@@ -3,614 +3,835 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TILP — Fast transfers for TI graphing calculators</title>
+  <title>TI-ConnectMC: Minecraft-style calculator connector</title>
+  <meta name="description" content="TI-ConnectMC: a Minecraft-style web connector for TI-84, TI-83, TI-Nspire, TI-89, HP Prime and NumWorks calculators. Send files, take screenshots and back up, right in Chrome or Edge.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#6a4a31" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1e1e24" media="(prefers-color-scheme: dark)">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" href="favicon.ico">
+  <link rel="manifest" href="site.webmanifest">
   <style>
+    /* Original pixel art from mc/tools/make_textures.py; fonts are SIL OFL 1.1 (mc/fonts/OFL.txt). */
+    @font-face {
+      font-family: "Jersey 10";
+      font-weight: 400;
+      font-display: swap;
+      src: url("mc/fonts/jersey-10-latin-400-normal.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Press Start 2P";
+      font-weight: 400;
+      font-display: swap;
+      src: url("mc/fonts/press-start-2p-latin-400-normal.woff2") format("woff2");
+    }
+
     :root {
-      --bg: #0b0f16;
-      --card: #121826;
-      --alt: #0f141f;
-      --border: rgba(255, 255, 255, 0.08);
-      --text: #e8edf5;
-      --muted: #94a0b8;
-      --accent: #5bd2c3;
-      --accent-2: #5a8cff;
-      --shadow: 0 24px 60px rgba(5, 10, 18, 0.5);
-      --glow: rgba(91, 210, 195, 0.2);
+      color-scheme: light dark;
+      --sky-top: #5d8fe6;
+      --sky-bottom: #a3c6fb;
+      --cloud: rgba(255, 255, 255, 0.92);
+      --ground: url("mc/textures/dirt.png");
+      --ground-shade: 0.45;
+      --panel: #c6c6c6;
+      --panel-hi: #ffffff;
+      --panel-lo: #555555;
+      --panel-text: #1e1e1e;
+      --panel-muted: #3c3c3c;
+      --panel-title: #3f3f3f;
+      --slot: #8b8b8b;
+      --link: #164a85;
+      --star-opacity: 0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --sky-top: #070b22;
+        --sky-bottom: #1d2552;
+        --cloud: rgba(140, 150, 200, 0.28);
+        --ground: url("mc/textures/deepslate.png");
+        --ground-shade: 0.3;
+        --panel: #2d2d33;
+        --panel-hi: #4a4a54;
+        --panel-lo: #0d0d10;
+        --panel-text: #ececec;
+        --panel-muted: #c4c4cc;
+        --panel-title: #e6e6e6;
+        --slot: #1f1f24;
+        --link: #8fd8ff;
+        --star-opacity: 1;
+      }
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
-      font-family: "Avenir Next", "Futura", "Trebuchet MS", sans-serif;
-      background:
-      radial-gradient(circle at 12% 16%, rgba(91, 210, 195, 0.18), transparent 35%),
-      radial-gradient(circle at 86% 8%, rgba(90, 140, 255, 0.2), transparent 35%),
-      radial-gradient(circle at 40% 85%, rgba(255, 255, 255, 0.06), transparent 45%),
-      var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
+      min-width: 320px;
+      font-family: "Jersey 10", system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 17px;
+      font-size-adjust: 0.58;
+      font-synthesis: none;
+      line-height: 1.5;
+      color: #ffffff;
+      background-color: #3b2a1c;
+      background-image:
+        linear-gradient(rgba(0, 0, 0, var(--ground-shade)), rgba(0, 0, 0, var(--ground-shade))),
+        var(--ground);
+      background-size: auto, 64px 64px;
+      image-rendering: pixelated;
     }
 
     a {
       color: inherit;
-      text-decoration: none;
     }
 
-    .hero {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 32px 24px 70px;
+    :focus-visible {
+      outline: 3px solid #ffff55;
+      outline-offset: 2px;
     }
 
-    .nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 0;
-      position: sticky;
-      top: 0;
-      backdrop-filter: blur(8px);
+    .skip-link {
+      position: absolute;
+      left: 12px;
+      top: -60px;
       z-index: 10;
+      padding: 8px 12px;
+      background: #000;
+      color: #fff;
     }
 
-    .brand {
-      font-weight: 700;
-      letter-spacing: 0.08em;
+    .skip-link:focus {
+      top: 12px;
+    }
+
+    /* ---------- Title screen ---------- */
+    .title-screen {
+      position: relative;
+      overflow: hidden;
+      min-height: min(100svh, 860px);
       display: flex;
-      align-items: center;
-      gap: 10px;
+      flex-direction: column;
+      background: linear-gradient(var(--sky-top), var(--sky-bottom));
+      isolation: isolate;
     }
 
-    .brand-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #081018;
-      font-weight: 700;
-      font-size: 13px;
-      letter-spacing: 0.08em;
-      box-shadow: 0 10px 24px rgba(90, 140, 255, 0.2);
+    /* Night sky: a few square stars and a square moon. */
+    .title-screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      opacity: var(--star-opacity);
+      background:
+        linear-gradient(#f4f1d0, #f4f1d0) 82% 12% / 44px 44px no-repeat,
+        radial-gradient(#ffffff 0 1.5px, transparent 2px) 0 0 / 97px 83px,
+        radial-gradient(#cfd8ff 0 1px, transparent 1.5px) 40px 30px / 131px 109px;
     }
 
-    .nav-links {
+    .cloud {
+      position: absolute;
+      z-index: -1;
+      width: 160px;
+      height: 24px;
+      background: var(--cloud);
+      animation: drift 120s linear infinite;
+    }
+
+    .cloud::before {
+      content: "";
+      position: absolute;
+      left: 32px;
+      top: -16px;
+      width: 72px;
+      height: 16px;
+      background: inherit;
+    }
+
+    .cloud.c1 { top: 12%; animation-delay: -20s; }
+    .cloud.c2 { top: 28%; width: 220px; animation-duration: 160s; animation-delay: -95s; }
+    .cloud.c3 { top: 48%; width: 120px; animation-duration: 140s; animation-delay: -60s; }
+
+    @keyframes drift {
+      from { transform: translateX(-260px); }
+      to { transform: translateX(calc(100vw + 40px)); }
+    }
+
+    .title-inner {
+      flex: 1;
+      width: 100%;
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 56px 16px 40px;
       display: flex;
-      gap: 18px;
-      color: var(--muted);
-    }
-
-    .nav-links a:hover {
-      color: var(--text);
-    }
-
-    .hero-content {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 28px;
-      align-items: center;
-      margin-top: 40px;
-    }
-
-    .hero-text h1 {
-      font-size: clamp(32px, 5vw, 48px);
-      line-height: 1.1;
-      margin: 12px 0 12px;
-    }
-
-    .lead {
-      color: var(--muted);
-      margin-bottom: 20px;
-    }
-
-    .cta-group {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-    }
-
-    .btn {
-      display: inline-flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 12px 18px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      font-weight: 600;
-      color: var(--text);
-      transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease, border 150ms ease;
+      gap: 36px;
     }
 
-    .btn.primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #020409;
-      border-color: transparent;
-      box-shadow: 0 12px 30px rgba(90, 140, 255, 0.25);
+    .logo-wrap {
+      position: relative;
+      text-align: center;
     }
 
-    .btn.ghost {
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .btn.text {
-      padding: 12px 0;
-      border: none;
-      background: transparent;
-      color: var(--accent);
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    }
-
-    .meta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      display: inline-block;
-    }
-
-    .hero-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: var(--shadow);
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-
-    .card-label {
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 12px;
-      color: var(--muted);
-      margin: 0 0 4px;
-    }
-
-    .card-title {
-      font-weight: 700;
+    .logo {
       margin: 0;
+      font-family: "Press Start 2P", monospace;
+      font-size-adjust: none;
+      font-weight: 400;
+      font-size: clamp(22px, 6.6vw, 60px);
+      line-height: 1.15;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      color: #9a9a9a;
+      background: url("mc/textures/stone.png") 0 0 / 48px 48px;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter:
+        drop-shadow(0 3px 0 #4a4a4a)
+        drop-shadow(0 3px 0 #2a2a2a)
+        drop-shadow(3px 3px 0 #000);
     }
 
-    .badge {
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(107, 240, 196, 0.12);
-      color: var(--accent);
-      border: 1px solid rgba(107, 240, 196, 0.4);
-      font-size: 12px;
+    .edition {
+      margin: 14px 0 0;
+      font-family: "Press Start 2P", monospace;
+      font-size-adjust: none;
+      font-size: clamp(9px, 1.8vw, 14px);
+      letter-spacing: 0.25em;
+      color: #ffffff;
+      text-shadow: 2px 2px 0 #3f3f3f;
     }
 
-    .card-image {
-      width: 100%;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #0f1116;
+    .splash {
+      position: absolute;
+      left: 100%;
+      top: 58%;
+      white-space: nowrap;
+      font-family: "Press Start 2P", monospace;
+      font-size-adjust: none;
+      font-size: clamp(9px, 1.7vw, 15px);
+      line-height: 1.2;
+      color: #ffff55;
+      text-shadow: 2px 2px 0 #3f3f15;
+      transform-origin: center;
+      transform: translate(-50%, 0) rotate(-18deg);
+      animation: splash-pulse 0.55s ease-in-out infinite alternate;
+      pointer-events: none;
     }
 
-    .card-footer {
-      color: var(--muted);
-      margin-top: 10px;
+    @keyframes splash-pulse {
+      from { scale: 1; }
+      to { scale: 1.1; }
     }
 
-    .section {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 60px 24px;
-    }
-
-    .section.alt {
-      background: var(--alt);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .section-header {
-      max-width: 680px;
-    }
-
-    .section h2 {
-      margin: 8px 0 6px;
-      font-size: clamp(26px, 4vw, 36px);
-    }
-
-    .subhead {
-      margin: 0;
-      color: var(--muted);
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      font-size: 12px;
-      text-transform: uppercase;
-    }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-      margin-top: 28px;
-    }
-
-    .feature-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      padding: 18px;
-      border-radius: 16px;
-      box-shadow: 0 16px 30px rgba(5, 10, 18, 0.3);
-    }
-
-    .feature-card h3 {
-      margin: 10px 0 8px;
-    }
-
-    .feature-card p {
-      margin: 0;
-      color: var(--muted);
-    }
-
-    .icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      background: rgba(90, 140, 255, 0.15);
-      color: var(--accent);
-      font-size: 18px;
-    }
-
-    .compat-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-      margin-top: 28px;
-    }
-
-    .compat-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      padding: 18px;
-      border-radius: 16px;
-    }
-
-    .compat-card h3 {
-      margin: 0 0 8px;
-    }
-
-    .compat-card p {
-      margin: 0;
-      color: var(--muted);
-    }
-
-    .two-col {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-    }
-
-    .list {
-      padding-left: 18px;
-      color: var(--muted);
-      margin: 0;
+    .menu {
+      width: min(400px, 100%);
       display: grid;
       gap: 10px;
     }
 
-    .panel {
-      background: var(--card);
-      border: 1px solid var(--border);
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 18px 40px rgba(5, 10, 18, 0.35);
-    }
-
-    .panel-tags {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    .panel-tags span {
-      padding: 6px 10px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    .cta {
-      text-align: left;
-    }
-
-    .cta-card {
-      background: linear-gradient(140deg, rgba(90, 140, 255, 0.12), rgba(91, 210, 195, 0.12));
-      border: 1px solid var(--border);
-      padding: 28px;
-      border-radius: 18px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 18px;
-      box-shadow: var(--shadow);
-      flex-wrap: wrap;
-      flex-direction: column;
-    }
-
-    .cta-grid {
+    .menu-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .mc-btn {
+      --tint: rgba(0, 0, 0, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 6px 12px;
+      font-size: 18px;
+      text-align: center;
+      text-decoration: none;
+      color: #ffffff;
+      text-shadow: 2px 2px 0 #3f3f3f;
+      border: 2px solid #000;
+      background:
+        linear-gradient(var(--tint), var(--tint)),
+        url("mc/textures/stone.png") 0 0 / 64px 64px;
+      box-shadow:
+        inset 2px 2px 0 rgba(255, 255, 255, 0.4),
+        inset -2px -3px 0 rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+    }
+
+    .mc-btn.primary {
+      --tint: rgba(46, 118, 22, 0.6);
+    }
+
+    .mc-btn:hover,
+    .mc-btn:focus-visible {
+      color: #ffffa0;
+      border-color: #ffffff;
+      outline: none;
+      background:
+        linear-gradient(var(--tint), var(--tint)),
+        linear-gradient(rgba(120, 140, 255, 0.18), rgba(120, 140, 255, 0.18)),
+        url("mc/textures/stone.png") 0 0 / 64px 64px;
+    }
+
+    .mc-btn:active {
+      box-shadow:
+        inset -2px -2px 0 rgba(255, 255, 255, 0.3),
+        inset 2px 3px 0 rgba(0, 0, 0, 0.45);
+    }
+
+    .corner {
+      position: absolute;
+      bottom: 54px;
+      padding: 2px 6px;
+      font-size: 14px;
+      color: #ffffff;
+      text-shadow: 2px 2px 0 #3f3f3f;
+      background: rgba(0, 0, 0, 0.35);
+    }
+
+    .corner.left { left: 12px; }
+    .corner.right { right: 12px; }
+
+    .ground {
+      height: 48px;
+      background: url("mc/textures/grass-edge.png") 0 0 / 48px 48px repeat-x;
+      box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.25);
+    }
+
+    /* ---------- Content screens ---------- */
+    main {
+      padding: 8px 16px 40px;
+    }
+
+    .screen {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 48px 0 8px;
+      scroll-margin-top: 8px;
+    }
+
+    .screen-title {
+      margin: 0 0 8px;
+      text-align: center;
+      font-family: "Press Start 2P", monospace;
+      font-size-adjust: none;
+      font-weight: 400;
+      font-size: clamp(16px, 3vw, 24px);
+      line-height: 1.4;
+      color: #ffffff;
+      text-shadow: 3px 3px 0 #3f3f3f;
+    }
+
+    .screen-sub {
+      margin: 0 auto 28px;
+      max-width: 640px;
+      text-align: center;
+      color: #e0e0e0;
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    /* Item tooltips: one per calculator family. */
+    .items {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .item {
+      flex: 1 1 300px;
+      max-width: 334px;
+      position: relative;
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 16px 16px 18px;
+      background: rgba(16, 0, 16, 0.94);
+      border: 2px solid rgba(16, 0, 16, 0.94);
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
+    }
+
+    .item::before {
+      content: "";
+      position: absolute;
+      inset: 2px;
+      border: 2px solid transparent;
+      border-image: linear-gradient(#5a20e0, #2c0a72) 1;
+      pointer-events: none;
+    }
+
+    .item-slot {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      background: #8b8b8b;
+      box-shadow:
+        inset 2px 2px 0 #373737,
+        inset -2px -2px 0 #ffffff;
+    }
+
+    .item-slot img {
+      width: 32px;
+      height: 32px;
+      image-rendering: pixelated;
+    }
+
+    .item h3 {
+      margin: 0 0 6px;
+      font-size: 19px;
+      font-weight: 700;
+      line-height: 1.25;
+      text-shadow: 2px 2px 0 #3f3f3f;
+    }
+
+    .item ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: #bdbdbd;
+    }
+
+    .item .link {
+      margin: 8px 0 0;
+      color: #9a9aff;
+    }
+
+    .aqua { color: #55ffff; }
+    .green { color: #55ff55; }
+    .gold { color: #ffaa00; }
+    .pink { color: #ff77ff; }
+    .white { color: #ffffff; }
+    .yellow { color: #ffff55; }
+    .red { color: #ff6b6b; }
+
+    /* Achievement toasts double as the feature list. */
+    .achievements {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
       gap: 14px;
     }
 
-    .cta-tile {
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      background: rgba(9, 12, 18, 0.35);
+    .achievement {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 4px 14px;
+      align-items: center;
+      padding: 12px 14px;
+      background: #212121;
+      border: 2px solid #000;
+      box-shadow:
+        inset 2px 2px 0 #5a5a5a,
+        inset -2px -2px 0 #0e0e0e,
+        0 6px 0 rgba(0, 0, 0, 0.35);
     }
 
-    .cta-tile h4 {
-      margin: 0 0 6px;
+    .achievement img {
+      grid-row: 1 / span 2;
+      width: 32px;
+      height: 32px;
+      image-rendering: pixelated;
     }
 
-    .cta-tile p {
-      margin: 0 0 12px;
-      color: var(--muted);
+    .achievement strong {
+      font-weight: 700;
+      color: #ffff55;
     }
 
-    .cta-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    .achievement span {
+      color: #ffffff;
     }
 
-    .footer-note {
-      text-align: center;
-      color: var(--muted);
+    /* Inventory-style GUI panel for the connection steps. */
+    .gui {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 24px 24px 28px;
+      color: var(--panel-text);
+      background: var(--panel);
+      border: 2px solid #000;
+      box-shadow:
+        inset 3px 3px 0 var(--panel-hi),
+        inset -3px -3px 0 var(--panel-lo),
+        0 6px 0 rgba(0, 0, 0, 0.35);
+    }
+
+    .gui h3 {
+      margin: 0 0 14px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--panel-title);
+    }
+
+    .steps {
+      margin: 0 0 22px;
+      padding: 0;
+      list-style: none;
+      counter-reset: step;
+      display: grid;
+      gap: 14px;
+    }
+
+    .steps li {
+      counter-increment: step;
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .steps li::before {
+      content: counter(step);
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      font-family: "Press Start 2P", monospace;
+      font-size-adjust: none;
       font-size: 14px;
+      color: #ffffff;
+      text-shadow: 2px 2px 0 #3f3f3f;
+      background: var(--slot);
+      box-shadow:
+        inset 2px 2px 0 var(--panel-lo),
+        inset -2px -2px 0 var(--panel-hi);
     }
 
-    .footer-note a {
-      color: var(--accent);
+    .steps strong {
+      display: block;
+      font-weight: 700;
     }
 
-    @media (max-width: 720px) {
-      .nav {
+    .steps span,
+    .tip p,
+    .tip li {
+      color: var(--panel-muted);
+    }
+
+    .tip {
+      margin: 0 0 22px;
+      padding: 14px 16px;
+      background: var(--slot);
+      background: color-mix(in srgb, var(--slot) 45%, var(--panel));
+      box-shadow:
+        inset 2px 2px 0 var(--panel-lo),
+        inset -2px -2px 0 var(--panel-hi);
+    }
+
+    .tip h4 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .tip ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .gui a:not(.mc-btn) {
+      color: var(--link);
+    }
+
+    .gui .mc-btn {
+      width: min(400px, 100%);
+      margin: 0 auto;
+    }
+
+    /* Credits read like the in-game chat. */
+    .chat {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      background: rgba(0, 0, 0, 0.6);
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    .chat p {
+      margin: 0 0 10px;
+      color: #e8e8e8;
+    }
+
+    .chat p:last-child {
+      margin-bottom: 0;
+    }
+
+    .chat a {
+      color: #ffffa0;
+    }
+
+    .chat .disclaimer {
+      color: #aaaaaa;
+    }
+
+    .page-footer {
+      padding: 18px 16px 28px;
+      text-align: center;
+      font-size: 15px;
+      color: #d0d0d0;
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    .page-footer a {
+      color: #ffffa0;
+    }
+
+    @media (max-width: 900px) {
+      .splash {
         position: static;
-        flex-wrap: wrap;
-        gap: 12px;
+        display: block;
+        margin: 14px auto 0;
+        white-space: normal;
+        transform: rotate(-4deg);
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        font-size: 16px;
       }
 
-      .nav-links {
-        width: 100%;
-        justify-content: flex-start;
-        flex-wrap: wrap;
-        gap: 12px;
+      .item {
+        max-width: none;
       }
 
-      .cta-card {
-        flex-direction: column;
-        align-items: flex-start;
+      .title-inner {
+        padding-top: 40px;
+        gap: 28px;
       }
+
+      .corner {
+        position: static;
+        align-self: center;
+        margin: 0 16px 6px;
+        text-align: center;
+        font-size: 13px;
+      }
+
+      .gui {
+        padding: 18px 16px 22px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .splash,
+      .cloud {
+        animation: none;
+      }
+
+      .cloud.c1 { left: 6%; }
+      .cloud.c2 { left: 72%; top: 8%; }
+      .cloud.c3 { left: 8%; top: 64%; }
     }
   </style>
 </head>
 <body>
-<header class="hero">
-  <div class="nav">
-    <div class="brand">
-      <span class="brand-badge">TILP</span>
+<a class="skip-link" href="#calculators">Skip to supported calculators</a>
+
+<header class="title-screen">
+  <div class="cloud c1" aria-hidden="true"></div>
+  <div class="cloud c2" aria-hidden="true"></div>
+  <div class="cloud c3" aria-hidden="true"></div>
+
+  <div class="title-inner">
+    <div class="logo-wrap">
+      <h1 class="logo">TI-ConnectMC</h1>
+      <p class="edition">CALCULATOR EDITION</p>
+      <span class="splash" id="splash" aria-hidden="true">Now with TI-84!</span>
     </div>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#downloads">Downloads</a>
-      <a href="webtilp.html">WebTILP</a>
-      <a href="https://github.com/debrouxl/tilp_and_gfm" target="_blank">GitHub</a>
-    </div>
-  </div>
-  <div class="hero-content">
-    <div class="hero-text">
-      <p class="pill">Open-source • Cross‑platform • Reliable</p>
-      <h1>The most complete TI calculator <=> computer transfer software.</h1>
-      <p class="lead">TILP (formerly GtkTiLink) is the modern linking suite for TI calculators. Send files, capture screens,
-        upgrade OS images, manage backups, and keep devices in sync across z80/eZ80, 68k, and Nspire models.</p>
-      <div class="cta-group">
-        <a class="btn primary" href="webtilp.html">Open WebTILP</a>
-        <a class="btn ghost" href="#downloads">Download TILP</a>
-        <a class="btn ghost" href="https://github.com/debrouxl/tilp_and_gfm" target="_blank">View on GitHub</a>
+
+    <nav class="menu" aria-label="Main menu">
+      <a class="mc-btn primary" href="webtilp.html">Launch Connector</a>
+      <a class="mc-btn" href="#calculators">Supported Calculators</a>
+      <a class="mc-btn" href="#connect">How to Connect</a>
+      <div class="menu-row">
+        <a class="mc-btn" href="https://github.com/miklHwang/webTexasInstumentConnector" target="_blank" rel="noopener">Source Code</a>
+        <a class="mc-btn" href="#credits">Credits</a>
       </div>
-      <div class="meta">
-        <span class="dot"></span>GPLv2 licensed • Actively maintained
-      </div>
-    </div>
+    </nav>
   </div>
+
+  <div class="corner left">TI-ConnectMC for Chrome &amp; Edge</div>
+  <div class="corner right">Not an official Minecraft product.</div>
+  <div class="ground" aria-hidden="true"></div>
 </header>
 
 <main>
-  <section id="features" class="section features">
-    <div class="section-header">
-      <p class="pill">Why TILP</p>
-      <h2>Everything you need to stay in sync.</h2>
-      <p class="subhead">Designed for speed, reliability, and a clean workflow on Linux, macOS, Windows, Chromebooks, Android.</p>
-    </div>
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="icon">⇆</div>
-        <h3>Fast transfers</h3>
-        <p>Send and receive variables, backups, FLASH apps, and OS upgrades with reliable cable and USB link support.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon">🎯</div>
-        <h3>Remote control</h3>
-        <p>Drive TI-89/TI-92+/V200, TI‑Z80/TI‑eZ80, and Nspire calculators remotely for teaching, demos, and debugging.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon">📷</div>
-        <h3>Instant screenshots</h3>
-        <p>Capture crisp calculator screens for documentation or classroom projection—no extra tooling needed.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon">🛡️</div>
-        <h3>Cross-platform</h3>
-        <p>Built with GTK, TILP runs seamlessly on Linux, macOS, and Windows with a consistent UI and UX. The Web version runs anywhere on Chrome/Edge.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon">🔌</div>
-        <h3>Link versatility</h3>
-        <p>Supports all cables plus virtual links for emulators.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon">🧭</div>
-        <h3>Clear workflows</h3>
-        <p>Keep backups, manage folders, and sync devices with confidence. Logs, status, and progress are always visible.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="section two-col">
-    <div>
-      <hr>
-    </div>
-  </section>
-
-  <section class="section two-col">
-    <div class="text">
-      <p class="pill">Workflow</p>
-      <h2>Great for classrooms, hobbyists, and developers.</h2>
-      <ul class="list">
-        <li><strong>Teach and present:</strong> Easy screen capture and remote control for projection and quick demos.</li>
-        <li><strong>Develop faster:</strong> Transfer variables, apps, OSes, screenshots in seconds.</li>
-        <li><strong>Stay safe:</strong> Keep reliable backups and restore points for experiments.</li>
-        <li><strong>Contribute:</strong> Fully open-source with an active community on GitHub.</li>
-      </ul>
-    </div>
-    <div class="panel">
-      <h3>Built to feel native.</h3>
-      <p>GTK-powered UI keeps controls familiar on every platform, with sensible defaults, gettext-based i18n/l10n, and a focus on clarity.</p>
-      <div class="panel-tags">
-        <span>C & C++</span>
-        <span>GTK+</span>
-        <span>glib</span>
-        <span>gettext</span>
-      </div>
-    </div>
-  </section>
-
-  <section class="section two-col">
-    <div>
-      <hr>
-    </div>
-  </section>
-
-  <section class="section two-col">
-    <div class="panel">
-      <h3>Link from the browser.</h3>
-      <p>WebTILP runs fully client‑side in the browser. You get device info, transfers, screenshots, backups...
-        Installation‑free on desktops, Chromebooks, and Android phones/tablets.</p>
-      <div class="panel-tags">
-        <span>Built in WASM</span>
-        <span>Uses WebUSB</span>
-        <span>For Chrome/Edge</span>
-      </div>
-      <div class="cta-actions" style="margin-top: 16px;">
-        <a class="btn primary" href="webtilp.html">Open WebTILP</a>
-        <a class="btn ghost" href="https://github.com/debrouxl/tilibs" target="_blank">Source code</a>
-      </div>
-    </div>
-    <div class="text">
-      <p class="pill">Also in the browser!</p>
-      <h2>Connect in seconds.</h2>
-      <ul class="list">
-        <li><strong>Install‑free:</strong> Runs anywhere you have Chrome/Edge.</li>
-        <li><strong>Devices:</strong> Works across desktops, Chromebooks, and Android phones/tablets.</li>
-        <li><strong>Cables:</strong> DirectLink or SilverLink USB adapters.</li>
-        <li><strong>Workflow:</strong> Authorize once, then reconnect instantly.</li>
-      </ul>
-    </div>
-  </section>
-
-  <section id="downloads" class="section cta">
-    <div class="cta-card">
-      <div>
-        <h2>Use TILP now!</h2>
-        <p class="subhead">Choose the build for your platform, or use WebTILP in the browser.</p>
-      </div>
-      <div class="cta-actions">
-        <a class="btn primary" href="https://github.com/debrouxl/tilp_and_gfm/releases" target="_blank">Releases</a>
-        <a class="btn ghost" href="https://github.com/debrouxl/tilp_and_gfm" target="_blank">Source</a>
-        <a class="btn ghost" href="webtilp.html">Launch WebTILP</a>
-      </div>
-      <div class="cta-grid">
-        <div class="cta-tile">
-          <h4>Desktop TILP</h4>
-          <p>Full feature set with native UI, and works fully offline with no internet required.</p>
-          <a class="btn text" href="https://github.com/debrouxl/tilp_and_gfm/releases" target="_blank">Download builds →</a>
+  <section id="calculators" class="screen" aria-labelledby="calculators-title">
+    <h2 class="screen-title" id="calculators-title">Supported Calculators</h2>
+    <p class="screen-sub">TI-ConnectMC talks to TI graphing calculators, the HP Prime and NumWorks straight from your browser. Nothing to install.</p>
+    <div class="items">
+      <article class="item">
+        <div class="item-slot"><img src="mc/textures/calculator.png" alt=""></div>
+        <div>
+          <h3 class="aqua">TI-84 Plus family</h3>
+          <ul>
+            <li>TI-84 Plus, Silver Edition</li>
+            <li>TI-84 Plus C Silver Edition</li>
+            <li>TI-84 Plus CE, CE Python</li>
+            <li>TI-84 Plus T</li>
+            <li>TI-84 Evo, Evo-T</li>
+          </ul>
+          <p class="link">USB cable</p>
         </div>
-        <div class="cta-tile">
-          <h4>WebTILP</h4>
-          <p>Client‑side only with WebUSB. Works on desktops, Chromebooks, and Android.</p>
-          <a class="btn text" href="webtilp.html">Launch WebTILP →</a>
+      </article>
+      <article class="item">
+        <div class="item-slot"><img src="mc/textures/calculator.png" alt=""></div>
+        <div>
+          <h3 class="green">TI-83 &amp; TI-82</h3>
+          <ul>
+            <li>TI-83 Premium CE, Python Edition</li>
+            <li>TI-83 Evo</li>
+            <li>TI-82 Advanced, Edition Python</li>
+            <li>TI-83, TI-83 Plus</li>
+          </ul>
+          <p class="link">USB cable (TI-83 and 83 Plus: SilverLink or GrayLink)</p>
         </div>
-        <div class="cta-tile">
-          <h4>tilibs</h4>
-          <p>Build your own tools on top of the same libraries that power TILP.</p>
-          <a class="btn text" href="https://github.com/debrouxl/tilibs" target="_blank">Browse tilibs →</a>
+      </article>
+      <article class="item">
+        <div class="item-slot"><img src="mc/textures/calculator.png" alt=""></div>
+        <div>
+          <h3 class="gold">TI-Nspire</h3>
+          <ul>
+            <li>TI-Nspire, Clickpad, Touchpad</li>
+            <li>TI-Nspire CX, CX CAS</li>
+            <li>TI-Nspire CX II, CX II CAS</li>
+            <li>TI-Nspire CX II-T, CM-C</li>
+          </ul>
+          <p class="link">USB cable</p>
         </div>
-      </div>
-      <div>
-        <h3>tilibs</h3>
-        <p class="subhead">tilibs are the libraries powering TILP:</p>
-        <ul class="list">
-          <li><strong>libticonv:</strong> Charset conversion and model utilities to keep TI filenames and text correct across platforms.</li>
-          <li><strong>libtifiles:</strong> TI file format toolkit for variables, apps, OS files, backups, and TiGroup archives.</li>
-          <li><strong>libticables:</strong> Link cable layer handling physical and virtual connections, including USB, parallel, serial, and emulator-backed links.</li>
-          <li><strong>libticalcs:</strong> High-level calculator protocol layer for transfers, screenshots, remote control, and device discovery.</li>
+      </article>
+      <article class="item">
+        <div class="item-slot"><img src="mc/textures/calculator.png" alt=""></div>
+        <div>
+          <h3 class="pink">TI-89 &amp; TI-92</h3>
+          <ul>
+            <li>TI-89, TI-89 Titanium</li>
+            <li>TI-92, TI-92 Plus</li>
+            <li>Voyage 200</li>
+          </ul>
+          <p class="link">TI-89 Titanium: USB cable. Others: SilverLink or GrayLink</p>
+        </div>
+      </article>
+      <article class="item">
+        <div class="item-slot"><img src="mc/textures/calculator.png" alt=""></div>
+        <div>
+          <h3 class="white">Classic TI</h3>
+          <ul>
+            <li>TI-73, TI-80, TI-82</li>
+            <li>TI-85, TI-86</li>
+          </ul>
+          <p class="link">SilverLink or GrayLink cable</p>
+        </div>
+      </article>
+      <article class="item">
+        <div class="item-slot"><img src="mc/textures/calculator.png" alt=""></div>
+        <div>
+          <h3 class="yellow">HP Prime</h3>
+          <ul>
+            <li>HP Prime G1, G2</li>
+            <li>Files, screenshots, backups</li>
+          </ul>
+          <p class="link">USB cable</p>
+        </div>
+      </article>
+      <article class="item">
+        <div class="item-slot"><img src="mc/textures/calculator.png" alt=""></div>
+        <div>
+          <h3 class="red">NumWorks</h3>
+          <ul>
+            <li>Python scripts in and out</li>
+            <li>Device info, storage backup</li>
+          </ul>
+          <p class="link">USB cable</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="features" class="screen" aria-labelledby="features-title">
+    <h2 class="screen-title" id="features-title">Achievements</h2>
+    <p class="screen-sub">What the connector can do. Sending, receiving, screenshots, backups and restores each pop an achievement in the Minecraft themes.</p>
+    <div class="achievements">
+      <div class="achievement"><img src="mc/textures/calculator.png" alt=""><strong>Special Delivery</strong><span>Send programs, apps, pictures and scripts.</span></div>
+      <div class="achievement"><img src="mc/textures/calculator.png" alt=""><strong>Treasure Hunter</strong><span>Receive variables from your calculator.</span></div>
+      <div class="achievement"><img src="mc/textures/calculator.png" alt=""><strong>Say Cheese</strong><span>Capture crisp screenshots.</span></div>
+      <div class="achievement"><img src="mc/textures/calculator.png" alt=""><strong>Safe and Sound</strong><span>Back up your whole calculator.</span></div>
+      <div class="achievement"><img src="mc/textures/calculator.png" alt=""><strong>Back in Business</strong><span>Restore a backup.</span></div>
+      <div class="achievement"><img src="mc/textures/calculator.png" alt=""><strong>Remote Control</strong><span>Press TI and HP Prime keys from the browser.</span></div>
+    </div>
+  </section>
+
+  <section id="connect" class="screen" aria-labelledby="connect-title">
+    <h2 class="screen-title" id="connect-title">How to Connect</h2>
+    <p class="screen-sub">Four steps, no installer.</p>
+    <div class="gui">
+      <ol class="steps">
+        <li><div><strong>Use Chrome or Edge</strong><span>On Windows, macOS, Linux, ChromeOS or Android. Firefox and Safari don't support the USB features this needs.</span></div></li>
+        <li><div><strong>Plug in your calculator</strong><span>Use its USB cable. Calculators with only a round link port need a SilverLink (USB) or GrayLink (serial) cable.</span></div></li>
+        <li><div><strong>Launch the connector and click Connect</strong><span>Pick your calculator in the browser's device list. On a NumWorks, open USB mode on the calculator first.</span></div></li>
+        <li><div><strong>Start crafting</strong><span>Drop files to send them, receive variables, take screenshots or make a backup.</span></div></li>
+      </ol>
+      <div class="tip">
+        <h4>Stuck?</h4>
+        <ul>
+          <li>Close other calculator software (TI Connect&trade; CE, TILP) before connecting.</li>
+          <li>On Windows, the connector tells you which driver to install if the browser can't open the calculator: TI Connect&trade; CE for the TI-84 Plus family and TI-89 Titanium, or WinUSB through <a href="https://zadig.akeo.ie/" target="_blank" rel="noopener">Zadig</a> for the rest.</li>
+          <li>On Linux, the TI-83/84 Evo needs your user in the <code>dialout</code> group.</li>
         </ul>
       </div>
-      <div class="cta-actions">
-        <a class="btn ghost" href="https://github.com/debrouxl/tilibs" target="_blank">GitHub</a>
-      </div>
+      <a class="mc-btn primary" href="webtilp.html">Launch Connector</a>
     </div>
   </section>
 
-  <section class="section footer-note">
-    <p>TILP is free software released under the <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="_blank">GNU
-      GPLv2</a>, and is not affiliated with Texas Instruments (TI).<br>TI trademarks belong to Texas Instruments Incorporated.</p>
-    <p>Community support: <a href="https://github.com/debrouxl/tilp_and_gfm">On GitHub</a>.</p>
+  <section id="credits" class="screen" aria-labelledby="credits-title">
+    <h2 class="screen-title" id="credits-title">Credits</h2>
+    <div class="chat">
+      <p>TI-ConnectMC is a Minecraft-style edition of <a href="https://github.com/adriweb/tilibs/tree/exp2-full-emscripten" target="_blank" rel="noopener">WebTILP</a> by Adriweb.</p>
+      <p>Powered by <a href="https://github.com/debrouxl/tilibs/" target="_blank" rel="noopener">tilibs</a> and <a href="https://github.com/debrouxl/hplp/" target="_blank" rel="noopener">hplp</a> (modified), with features inspired by <a href="https://github.com/debrouxl/tilp_and_gfm" target="_blank" rel="noopener">TILP</a>, all <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="_blank" rel="noopener">GPLv2</a>. NumWorks support by <a href="https://github.com/Yaya-Cout/Upsilon.js" target="_blank" rel="noopener">Upsilon.js</a> and <a href="https://github.com/M4xi1m3/webdfu" target="_blank" rel="noopener">WebDFU</a> (MIT).</p>
+      <p>Pixel fonts: Jersey 10 and Press Start 2P (<a href="mc/fonts/OFL.txt" target="_blank">SIL OFL 1.1</a>). All textures are original artwork.</p>
+      <p>Source code: <a href="https://github.com/miklHwang/webTexasInstumentConnector" target="_blank" rel="noopener">miklHwang/webTexasInstumentConnector</a></p>
+      <p class="disclaimer">Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft. TI-ConnectMC is not affiliated with Texas Instruments, HP or NumWorks; their trademarks belong to their respective owners.</p>
+    </div>
   </section>
 </main>
+
+<footer class="page-footer">
+  <a href="#">Back to title screen</a>
+</footer>
+
+<script>
+  (function () {
+    var splashes = [
+      'Now with TI-84!', 'HP Prime too!', 'NumWorks inside!', 'Works offline!',
+      'Plug it in!', '100% blocky!', 'WebUSB powered!', 'Back up your programs!',
+      'Craft your programs!', 'Mine your variables!', 'Archive or RAM?', 'Nspire ready!',
+      'No install needed!', 'Graph all the things!', 'Made with tilibs!', 'Open source!',
+      'Mind the cable!', 'Pixel perfect!'
+    ];
+    var splash = document.getElementById('splash');
+    if (splash) {
+      splash.textContent = splashes[Math.floor(Math.random() * splashes.length)];
+    }
+  })();
+</script>
 </body>
 </html>
