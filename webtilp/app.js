@@ -625,7 +625,7 @@ const I18N_EN = {
     "hp_prime_key_range": "HP Prime key codes must be between 0 and 50.",
     "hp_prime_key_send_failed": "Failed to send HP Prime key ({error}).",
     "hp_prime_key_sent": "Sent HP Prime key {key} (0x{hex}).",
-    "hp_prime_confirm_unchecked_overwrite": "The HP Prime file list has not been refreshed, so WebTILP cannot detect overwrites. Sending may replace an item with the same name and type. Continue?",
+    "hp_prime_confirm_unchecked_overwrite": "The HP Prime file list has not been refreshed, so TI-ConnectMC cannot detect overwrites. Sending may replace an item with the same name and type. Continue?",
     "hp_prime_upload_cancelled": "HP Prime upload cancelled before overwrite preflight.",
     "hp_prime_unsupported_file": "Unsupported HP Prime filename or extension: {file}.",
     "hp_prime_confirm_overwrite": "\u201c{file}\u201d will replace the existing HP Prime item \u201c{existing}\u201d. Continue?",
@@ -727,12 +727,12 @@ const I18N_EN = {
     "numworks_script_deleted": "Deleted {name}.py from NumWorks storage.",
     "numworks_download_failed": "NumWorks download failed",
     "connect_calculator": "Connect Calculator",
-    "welcome_title": "Welcome to WebTILP!",
-    "welcome_text": "Plug in your calculator, then click \"Connect Calculator\"; WebTILP will detect its family automatically.",
+    "welcome_title": "Welcome to TI-ConnectMC!",
+    "welcome_text": "Plug in your calculator, then click \"Connect Calculator\"; TI-ConnectMC will detect its family automatically.",
     "webusb_unavailable_title": "WebUSB is not available in this browser.",
     "webusb_unavailable_text": "Please use a WebUSB-compatible browser like Chrome, Edge, or Brave.",
     "webserial_only_title": "WebUSB is not available; WebSerial support only.",
-    "webserial_only_text": "This browser supports WebSerial, so WebTILP can connect to TI-83/84 Evo calculators or an explicitly selected GrayLink serial cable. Use a WebUSB-enabled browser for all USB calculators.",
+    "webserial_only_text": "This browser supports WebSerial, so TI-ConnectMC can connect to TI-83/84 Evo calculators or an explicitly selected GrayLink serial cable. Use a WebUSB-enabled browser for all USB calculators.",
     "device": "Device",
     "model": "Model",
     "free_memory": "Free Memory",
@@ -782,6 +782,7 @@ const I18N_EN = {
     "cable_delay": "Cable delay (us)",
     "language": "Language",
     "convert_script_files": "Convert .py, .lua and .mpy files to calculator format",
+    "click_sounds": "Button click sounds",
     "mpy_conversion_disabled": "Enable script conversion in Settings to send {file}.",
     "mpy_unsupported_target": "{file} requires a CE Python, Evo, or TI-Nspire CX II calculator.",
     "mpy_incompatible": "{file} is not compatible bytecode for {target}. Recompile the source for this calculator; changing the file extension does not convert bytecode.",
@@ -822,7 +823,7 @@ const I18N_EN = {
     "archive": "Archive",
     "flash_apps": "Flash apps",
     "backup_note": "Standard backups may fail on large memory contents. TIGroup is recommended for big backups.",
-    "backup_manual_note": "After clicking Create Backup, send a Backup from the calculator's LINK menu. WebTILP will wait for you to start it.",
+    "backup_manual_note": "After clicking Create Backup, send a Backup from the calculator's LINK menu. TI-ConnectMC will wait for you to start it.",
     "backup_manual_waiting": "Waiting for backup: send a Backup from the calculator's LINK menu.",
     "loading_dirlist": "Loading directory listing...",
     "create_backup": "Create Backup",
@@ -833,14 +834,23 @@ const I18N_EN = {
     "theme_professional_light": "Professional Light",
     "theme_professional_dark": "Professional Dark",
     "theme_minimal": "Minimal",
+    "theme_minecraft": "Minecraft (Auto)",
+    "theme_minecraft_day": "Minecraft Day",
+    "theme_minecraft_night": "Minecraft Night",
     "auto": "Auto",
     "directlink_usb": "DirectLink USB",
     "silverlink_usb": "SilverLink (Graph Link USB)",
     "idle": "Idle",
     "error_title": "Error",
     "notice_title": "Notice",
+    "achievement_title": "Achievement unlocked!",
+    "achievement_files_sent": "Special Delivery: files sent to your calculator.",
+    "achievement_vars_received": "Treasure Hunter: items received from your calculator.",
+    "achievement_backup_done": "Safe and Sound: backup saved.",
+    "achievement_restore_done": "Back in Business: backup restored.",
+    "achievement_screenshot": "Say Cheese: screenshot captured.",
     "status_loading_module": "Loading module...",
-    "status_module_ready": "WebTILP ready",
+    "status_module_ready": "TI-ConnectMC ready",
     "status_connected": "Connected",
     "status_connection_failed": "Connection failed",
     "status_evo_serial_authorization_required": "Click Connect Calculator again to authorize the Evo serial port.",
@@ -892,11 +902,11 @@ const I18N_EN = {
     "kind_folder": "folder",
     "kind_item": "item",
     "close": "Close",
-    "backup_receive_first": "Click Create Backup in WebTILP first.",
+    "backup_receive_first": "Click Create Backup in TI-ConnectMC first.",
     "backup_receive_82": "On the calculator: 2nd → LINK → SEND → 4:Back Up… → 1:Transmit.",
     "backup_receive_8586": "On the calculator: 2nd → LINK → F1:SEND → F1:BKUP → F1:XMIT.",
-    "backup_receive_finish": "Keep the cable connected. WebTILP downloads the backup when the transfer finishes.",
-    "backup_receive_auto": "Keep the calculator on its home screen. WebTILP starts the backup automatically.",
+    "backup_receive_finish": "Keep the cable connected. TI-ConnectMC downloads the backup when the transfer finishes.",
+    "backup_receive_auto": "Keep the calculator on its home screen. TI-ConnectMC starts the backup automatically.",
     "backup_rom_menu_note": "Button names can vary with the ROM version. Follow the corresponding SEND / RECEIVE choices in your calculator’s LINK menu.",
     "backup_restore_title": "Restore Backup",
     "backup_receive_title": "Receiving Backup",
@@ -904,8 +914,8 @@ const I18N_EN = {
     "backup_restore_warning": "Restoring a memory backup replaces the calculator’s current memory. Save a backup first if you need to keep it.",
     "backup_restore_82_prepare": "Before clicking Restore Backup, put the calculator in receive mode: 2nd → LINK → RECEIVE → 1:Receive.",
     "backup_restore_8586_prepare": "Before clicking Restore Backup, put the calculator in receive mode: 2nd → LINK → F2:RECV.",
-    "backup_restore_auto": "Keep the calculator on its home screen. WebTILP starts the restore automatically.",
-    "backup_restore_start": "Click Restore Backup in WebTILP.",
+    "backup_restore_auto": "Keep the calculator on its home screen. TI-ConnectMC starts the restore automatically.",
+    "backup_restore_start": "Click Restore Backup in TI-ConnectMC.",
     "backup_restore_82_continue": "When the calculator shows WARNING — Backup, press 1:Continue to begin restoring.",
     "backup_restore_8586_continue": "When the calculator shows WARNING Memory Backup, press F1:CONT to begin restoring.",
     "backup_wait_82": "Waiting for backup: on the calculator, LINK → SEND → 4:Back Up… → 1:Transmit.",
@@ -1175,7 +1185,8 @@ function showToast(message, type = 'error') {
     }
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    const title = type === 'error' ? t('error_title') : t('notice_title');
+    const title = type === 'error' ? t('error_title')
+        : (type === 'achievement' ? t('achievement_title') : t('notice_title'));
     const titleEl = document.createElement('div');
     titleEl.className = 'toast-title';
     titleEl.textContent = title;
@@ -1192,6 +1203,103 @@ function showToast(message, type = 'error') {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 250);
     }, timeout);
+}
+
+// ---- TI-ConnectMC extras: achievement toasts, click sounds and splash text ----
+
+const CLICK_SOUNDS_STORAGE_KEY = 'ticonnectmc.clickSounds';
+const MC_SPLASHES = [
+    'Now with TI-84!',
+    'HP Prime too!',
+    'NumWorks inside!',
+    'Works offline!',
+    'Plug it in!',
+    '100% blocky!',
+    'WebUSB powered!',
+    'Back up your programs!',
+    'Craft your programs!',
+    'Mine your variables!',
+    'Archive or RAM?',
+    'Nspire ready!',
+    'No install needed!',
+    'Graph all the things!',
+    'Made with tilibs!',
+    'Open source!',
+    'Mind the cable!',
+    'Pixel perfect!'
+];
+let clickAudioContext = null;
+
+function isMinecraftTheme() {
+    return (document.body?.dataset.theme || '').startsWith('minecraft');
+}
+
+// Transfer code calls this through globalThis.TIConnectMC so unit tests that
+// run those functions in isolation do not need to stub it.
+function showAchievement(key) {
+    if (isMinecraftTheme()) {
+        showToast(t(key), 'achievement');
+    }
+}
+
+function clickSoundsEnabled() {
+    try {
+        return localStorage.getItem(CLICK_SOUNDS_STORAGE_KEY) === '1';
+    } catch {
+        return false;
+    }
+}
+
+function setClickSoundsEnabled(enabled) {
+    try {
+        localStorage.setItem(CLICK_SOUNDS_STORAGE_KEY, enabled ? '1' : '0');
+    } catch {
+        // Private mode: the toggle just won't persist.
+    }
+}
+
+// A short, blocky "tick" synthesized on the fly (no game audio is used).
+function playClickSound() {
+    const AudioContextClass = globalThis.AudioContext || globalThis.webkitAudioContext;
+    if (!AudioContextClass) {
+        return;
+    }
+    clickAudioContext ||= new AudioContextClass();
+    const ctx = clickAudioContext;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(1100, now);
+    osc.frequency.exponentialRampToValueAtTime(420, now + 0.05);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.08, now + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.08);
+}
+
+function initMinecraftExtras() {
+    globalThis.TIConnectMC = { achievement: showAchievement };
+    const splash = document.getElementById('mcSplash');
+    if (splash) {
+        splash.textContent = MC_SPLASHES[Math.floor(Math.random() * MC_SPLASHES.length)];
+    }
+    const toggle = document.getElementById('settingClickSounds');
+    if (toggle) {
+        toggle.checked = clickSoundsEnabled();
+        toggle.addEventListener('change', () => setClickSoundsEnabled(toggle.checked));
+    }
+    document.addEventListener('click', event => {
+        if (!clickSoundsEnabled()) {
+            return;
+        }
+        const button = event.target.closest?.('.btn, .folder-toggle');
+        if (button && !button.disabled) {
+            playClickSound();
+        }
+    }, true);
 }
 
 function getFallbackErrorMessage(code) {
@@ -3408,6 +3516,10 @@ function clearKeyMapDataList() {
 
 const THEME_STORAGE_KEY = 'webtilp.theme';
 const THEMES = [
+    // TI-ConnectMC: the Minecraft themes come first so the automatic one is the default.
+    { id: 'minecraft', labelKey: 'theme_minecraft' },
+    { id: 'minecraft-day', labelKey: 'theme_minecraft_day' },
+    { id: 'minecraft-night', labelKey: 'theme_minecraft_night' },
     { id: 'dark-modern', labelKey: 'theme_dark_modern' },
     { id: 'light-modern', labelKey: 'theme_light_modern' },
     { id: 'retro', labelKey: 'theme_retro' },
@@ -4259,6 +4371,7 @@ async function applyTranslations() {
     setTextContent(document.getElementById('settingDelayLabel'), t('cable_delay'));
     setTextContent(document.getElementById('settingLanguageLabel'), t('language'));
     setTextContent(document.getElementById('settingConvertScriptFilesLabel'), t('convert_script_files'));
+    setTextContent(document.getElementById('settingClickSoundsLabel'), t('click_sounds'));
     setTextContent(document.getElementById('settingsNote'), t('settings_note'));
     setTextContent(document.getElementById('offlineBannerText'), state.offlineUpdateShown ? t('offline_update_available') : t('offline_ready'));
     setIconLabel(els.btnReloadOffline, 'refresh-cw', t('reload_for_update'), '↻');
@@ -4814,13 +4927,13 @@ function closeConnectionHelpModal() {
 
 function showCableOpenHelp(result) {
     const code = Number(result);
-    const closeAppsReminder = '<p>Before trying again, close any other WebTILP pages, browser tabs, TI tools, terminal sessions, or other apps that may already be using the calculator or cable.</p>';
+    const closeAppsReminder = '<p>Before trying again, close any other TI-ConnectMC pages, browser tabs, TI tools, terminal sessions, or other apps that may already be using the calculator or cable.</p>';
 
     const cdcPort = isSerialDevice(state.authorizedDevice) && state.authorizedDevice.serialPort;
     if (cdcPort?.device) {
         const detail = cdcPort.lastOpenError?.message;
         openConnectionHelpModal('Evo USB serial connection failed', `
-            <p>WebTILP selected the Evo through WebUSB, but could not open its USB CDC serial interfaces.</p>
+            <p>TI-ConnectMC selected the Evo through WebUSB, but could not open its USB CDC serial interfaces.</p>
             ${detail ? `<p>${escapeHtml(detail)}</p>` : ''}
             ${closeAppsReminder}
             <p>Unplug and reconnect the Evo, then try again. The browser and phone firmware must allow access to its USB interfaces.</p>
@@ -4830,7 +4943,7 @@ function showCableOpenHelp(result) {
 
     if (isLinuxPlatform() && code === 58) {
         openConnectionHelpModal('Linux serial permission needed', `
-            <p>WebTILP can see the TI-83/84 Evo, but Linux refused to open its serial device.</p>
+            <p>TI-ConnectMC can see the TI-83/84 Evo, but Linux refused to open its serial device.</p>
             <ol>
                 <li>Add your user to the serial device group: <code>sudo usermod -a -G dialout $USER</code></li>
                 <li>Fully log out and log back in, or reboot. Restarting the browser alone is not enough.</li>
@@ -5191,7 +5304,7 @@ function ensureSupportedTransport() {
 async function initModule() {
     ensureSupportedTransport();
     if (!window.crossOriginIsolated) {
-        throw new Error('WebTILP could not enable browser isolation. Allow service workers and reload the page.');
+        throw new Error('TI-ConnectMC could not enable browser isolation. Allow service workers and reload the page.');
     }
     if (state.module) {
         return state.module;
@@ -9309,6 +9422,10 @@ async function performTransfers(plan, module, options) {
     // Close even when trailing entries were skipped (e.g. overwrite declined).
     // Do not report a successful batch until the calculator acknowledges EOT.
     await finishVarSend();
+    if (successCount > 0) {
+        const restored = plan.some(item => item?.fileClass === 'backup');
+        globalThis.TIConnectMC?.achievement(restored ? 'achievement_restore_done' : 'achievement_files_sent');
+    }
     return { successCount };
 }
 
@@ -9364,6 +9481,7 @@ async function sendNumWorksFiles(files) {
     readNumWorksInfo();
     applyNumWorksStorageSnapshot();
     log(tFormat('numworks_scripts_sent', { count: pending.length }));
+    globalThis.TIConnectMC?.achievement('achievement_files_sent');
 }
 
 async function sendSelectedFiles() {
@@ -9448,6 +9566,7 @@ async function sendSelectedFiles() {
             }
             if (successCount > 0) {
                 setSelectedFiles([]);
+                globalThis.TIConnectMC?.achievement('achievement_files_sent');
                 await refreshDirlist();
             }
             return;
@@ -9606,6 +9725,7 @@ async function receiveBackup() {
             triggerDownload('hp-prime-backup.zip', data);
             module.FS.unlink(target);
             log(tFormat('hp_prime_backup_received', { count: snapshotCount }));
+            globalThis.TIConnectMC?.achievement('achievement_backup_done');
             return;
         }
         if (isNumWorksActive()) {
@@ -9613,6 +9733,7 @@ async function receiveBackup() {
             const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
             triggerDownload(`numworks-storage-${stamp}.bin`, data);
             log(tFormat('numworks_backup_received', { size: data.byteLength }));
+            globalThis.TIConnectMC?.achievement('achievement_backup_done');
             return;
         }
         await authorizeDevice();
@@ -9677,6 +9798,7 @@ async function receiveBackup() {
         }
         await downloadLastReceived(module, filename);
         log(isTigroup ? 'TIGroup backup received.' : 'Backup received.');
+        globalThis.TIConnectMC?.achievement('achievement_backup_done');
     } catch (err) {
         logError(err, 'Receive backup failed');
     } finally {
@@ -9993,6 +10115,9 @@ async function receiveSelected() {
             } else {
                 log(`Failed to receive ${entry.name} (${formatErrorResult(module, result)}).`);
             }
+        }
+        if (receivedAny) {
+            globalThis.TIConnectMC?.achievement('achievement_vars_received');
         }
     } catch (err) {
         logError(err, 'Receive selected failed');
@@ -11099,6 +11224,7 @@ async function takeScreenshot() {
                 width: canvas.width,
                 height: canvas.height
             }));
+            globalThis.TIConnectMC?.achievement('achievement_screenshot');
             return;
         }
         if (isNumWorksActive()) {
@@ -11133,6 +11259,7 @@ async function takeScreenshot() {
         els.screenshotCanvas.classList.add('filled');
         updateScreenshotCanvasScale();
         log(`Screenshot captured (${width}x${height}).`);
+        globalThis.TIConnectMC?.achievement('achievement_screenshot');
         try {
             module.FS.unlink('/screenshot.bin');
         } catch (cleanupErr) {
@@ -11873,6 +12000,7 @@ async function bootstrap() {
         document.documentElement.lang = 'en';
     }
     bindEvents();
+    initMinecraftExtras();
     loadBuildInfo();
     seedSettingsForm();
     updateSendFilesButtonState();

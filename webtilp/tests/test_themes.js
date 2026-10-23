@@ -88,7 +88,8 @@ for (const name of ['escapeHtml', 'isMinimalTheme', 'iconMarkup', 'themeIconMark
     vm.runInContext(extractFunction(name), context);
 }
 
-context.applyTheme('dark-modern');
+// Start from the default (first) theme so the cycle below visits every entry in order.
+context.applyTheme(vm.runInContext('THEMES[0].id', context));
 const settings = body.appendChild(new Element('btn'));
 const badge = settings.appendChild(new Element('settings-update-dot hidden'));
 context.setIconLabel(settings, 'settings', 'Settings & options', '⚙️');

@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebTILP</title>
+    <title>TI-ConnectMC</title>
+    <meta name="description" content="TI-ConnectMC: a Minecraft-style web connector for TI, HP Prime and NumWorks calculators, right in your browser.">
+    <meta name="color-scheme" content="light dark">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="icon" href="favicon.ico">
     <link rel="manifest" href="site.webmanifest">
-    <meta name="theme-color" content="#0d1117">
+    <meta name="theme-color" content="#6a4a31" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1e1e24" media="(prefers-color-scheme: dark)">
     <link rel="stylesheet" href="app.css">
+    <link rel="stylesheet" href="minecraft.css">
     <link rel="stylesheet" href="build-profile.css">
 </head>
 <body class="initializing" aria-busy="true">
     <section class="initialization-screen" id="initializationScreen" role="status" aria-live="polite" aria-atomic="true">
         <div class="splash-card initialization-card">
-            <div class="brand-title">WebTILP</div>
+            <div class="brand-title">TI-ConnectMC</div>
             <span class="initialization-spinner" aria-hidden="true"></span>
             <p>Initializing...</p>
         </div>
@@ -54,11 +58,12 @@
     <header class="topbar">
         <div class="brand">
             <div class="brand-mark">
-                <span>Web<br>TILP</span><span class="brand-beta">Beta</span>
+                <span>TI<br>MC</span><span class="brand-beta">Beta</span>
                 <span class="brand-build hidden" id="brandBuildInfo"></span>
             </div>
-            <div>
-                <div class="brand-title">WebTILP</div>
+            <div class="brand-text">
+                <div class="brand-title">TI-ConnectMC</div>
+                <span class="mc-splash" id="mcSplash" aria-hidden="true"></span>
                 <div class="brand-subtitle" id="brandSubtitle">Universal linking, right from your browser!</div>
             </div>
         </div>
@@ -87,7 +92,7 @@
 
     <section class="splash" id="splashScreen">
         <div class="splash-card">
-            <h1 id="splashTitle">Welcome to WebTILP!</h1>
+            <h1 id="splashTitle">Welcome to TI-ConnectMC!</h1>
             <p id="splashText">Plug in your TI graphing calculator, then click “Connect Calculator” to get started.</p>
             <div class="splash-warning hidden" id="splashWebUsbWarning">
                 <p><strong id="splashWebUsbWarningTitle">WebUSB is not available in this browser.</strong></p>
@@ -265,6 +270,12 @@
                         <label class="form-option">
                             <input type="checkbox" id="settingConvertScriptFiles" checked>
                             <span id="settingConvertScriptFilesLabel">Convert .py, .lua and .mpy files to calculator format</span>
+                        </label>
+                    </div>
+                    <div class="form-field" id="settingClickSoundsField">
+                        <label class="form-option">
+                            <input type="checkbox" id="settingClickSounds">
+                            <span id="settingClickSoundsLabel">Button click sounds</span>
                         </label>
                     </div>
                 </div>
@@ -475,12 +486,15 @@
     </div>
 
     <footer class="footer">
-        <span>WebTILP made by <a href="https://github.com/adriweb/tilibs/tree/exp2-full-emscripten" target="_blank">Adriweb</a>
-            <abbr title="Initial build infrastructure and lib intertwining done manually, but Frontend (HTML/JS/CSS) and Middleware glue (webtilp.cpp…) all created by Codex (95%) and Claude (5%).">with LLMs</abbr>.</span>
+        <span>TI-ConnectMC is a Minecraft-style edition of <a href="https://github.com/adriweb/tilibs/tree/exp2-full-emscripten" target="_blank">WebTILP</a>, made by Adriweb
+            <abbr title="Initial build infrastructure and lib intertwining done manually, but Frontend (HTML/JS/CSS) and Middleware glue (webtilp.cpp…) all created by Codex (95%) and Claude (5%).">with LLMs</abbr>.
+            TI-ConnectMC source code: <a href="https://github.com/miklHwang/webTexasInstumentConnector" target="_blank">miklHwang/webTexasInstumentConnector</a>.</span>
         <span>Powered by <a href="https://github.com/debrouxl/tilibs/" target="_blank">tilibs</a> + <a href="https://github.com/debrouxl/hplp/" target="_blank">hplp</a> <i>(modified)</i>
               with features inspired by <a href="https://github.com/debrouxl/tilp_and_gfm" target="_blank">TILP</a>, all <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="_blank">GPLv2</a>-licensed.</span>
         <span>NumWorks support powered by <a href="https://github.com/Yaya-Cout/Upsilon.js" target="_blank">Upsilon.js</a> &amp; <a href="https://github.com/M4xi1m3/webdfu" target="_blank">WebDFU</a>, both <a href="https://opensource.org/license/mit" target="_blank">MIT</a>-licensed.</span>
-        <span>(Web)TILP is not affiliated with Texas Instruments, HP, or NumWorks — their trademarks belong to their respective owners.</span>
+        <span>Pixel fonts: <a href="https://fonts.google.com/specimen/Jersey+10" target="_blank">Jersey 10</a> &amp; <a href="https://fonts.google.com/specimen/Press+Start+2P" target="_blank">Press Start 2P</a>, <a href="mc/fonts/OFL.txt" target="_blank">SIL OFL 1.1</a>. All textures are original artwork.</span>
+        <span>Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.
+            TI-ConnectMC and (Web)TILP are not affiliated with Texas Instruments, HP, or NumWorks — their trademarks belong to their respective owners.</span>
     </footer>
 
     <div class="toast-container" id="toastContainer" aria-live="polite"></div>
