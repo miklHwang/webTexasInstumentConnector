@@ -1,4 +1,4 @@
-name: Build WebTILP
+name: Build TI-ConnectMC
 
 on:
   push:
@@ -148,13 +148,14 @@ jobs:
           make -C "$LUNA_DIR" clean
           make -C webtilp -j"$(nproc)" prepare_python_converters
 
-      - name: Build and test development WebTILP
+      - name: Build and test TI-ConnectMC (production profile)
         run: |
           source "$EMSDK/emsdk_env.sh"
           PATH="$(dirname "$EMSDK_NODE"):$PATH"
           export PATH
           # Converter assets were restored or built above; keep their smoke tests below.
-          make -C webtilp -j"$(nproc)" -o prepare_python_converters dev
+          # TI-ConnectMC deploys the minified production profile (no DEV badge).
+          make -C webtilp -j"$(nproc)" -o prepare_python_converters prod
           make -C webtilp test
           make -C webtilp test-python-bytecode-wasm
           node webtilp/tests/test_wasm_startup.cjs
@@ -209,14 +210,15 @@ jobs:
           print(f'Packaged {len(assets)} site assets with build provenance')
           PY
 
-      - name: Upload development site
+      - name: Upload site
         uses: actions/upload-pages-artifact@v5
         with:
           path: build-wasm-deps/site
           retention-days: 90
 
   deploy:
-    if: ${{ github.repository == 'adriweb/tilibs' && (github.ref == 'refs/heads/exp2-full-emscripten' || github.ref == 'refs/heads/other-calc-families') && github.event_name != 'pull_request' }}
+    # TI-ConnectMC: publish whatever the repository's default branch is.
+    if: ${{ github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 15
