@@ -837,6 +837,12 @@ const I18N_EN = {
     "theme_minecraft": "Minecraft (Auto)",
     "theme_minecraft_day": "Minecraft Day",
     "theme_minecraft_night": "Minecraft Night",
+    "theme_modern": "Modern",
+    "theme_cyberpunk": "Cyberpunk",
+    "theme_picker_hint": "Click a theme to try it. Choose Set as default to open TI-ConnectMC with it next time on this device.",
+    "theme_set_default": "Set as default",
+    "theme_is_default": "Your default theme",
+    "theme_default_badge": "Default",
     "auto": "Auto",
     "directlink_usb": "DirectLink USB",
     "silverlink_usb": "SilverLink (Graph Link USB)",
@@ -1056,8 +1062,9 @@ function setTextContent(element, value) {
     }
 }
 
-function isMinimalTheme() {
-    return document.body.dataset.theme === 'minimal';
+// Minimal and Modern draw Feather line icons instead of emoji.
+function themeUsesIcons() {
+    return findTheme(document.body.dataset.theme)?.icons === 'svg';
 }
 
 function iconMarkup(name) {
@@ -1065,7 +1072,7 @@ function iconMarkup(name) {
 }
 
 function themeIconMarkup(name, emoji) {
-    const glyph = isMinimalTheme() ? iconMarkup(name) : escapeHtml(emoji);
+    const glyph = themeUsesIcons() ? iconMarkup(name) : escapeHtml(emoji);
     return `<span class="theme-icon" data-icon="${escapeHtml(name)}" data-emoji="${escapeHtml(emoji)}" aria-hidden="true">${glyph}</span>`;
 }
 
@@ -1073,7 +1080,7 @@ function updateThemeIcons() {
     // Only replace glyphs: changing theme must preserve controls, loading state,
     // selected variables, and the existing sticky-folder header.
     document.querySelectorAll('.theme-icon').forEach(element => {
-        if (isMinimalTheme()) {
+        if (themeUsesIcons()) {
             element.innerHTML = iconMarkup(element.dataset.icon);
         } else {
             element.textContent = element.dataset.emoji;
@@ -1082,7 +1089,7 @@ function updateThemeIcons() {
 }
 
 // Renders either "<emoji> <label>" (legacy themes) or a Feather-icon + label
-// (Minimal theme, which drops emoji in favor of plain glyphs). Preserves any
+// (Minimal and Modern themes, which drop emoji in favor of plain glyphs). Preserves any
 // child badge nodes (e.g. the settings update dot) across the re-render.
 function setIconLabel(element, iconName, label, emoji) {
     if (!element) {
@@ -3514,19 +3521,36 @@ function clearKeyMapDataList() {
     });
 }
 
+// The theme a first visit opens with; "Set as default" in Settings overrides it per device.
+const SITE_DEFAULT_THEME = 'minecraft';
 const THEME_STORAGE_KEY = 'webtilp.theme';
+// A theme picked in Settings without "Set as default" lasts until the tab is closed.
+const THEME_SESSION_KEY = 'ticonnectmc.sessionTheme';
+// preview: one [background, panel, accent, text] palette per picker swatch half
+// (themes that follow the device light/dark setting show both).
 const THEMES = [
-    // TI-ConnectMC: the Minecraft themes come first so the automatic one is the default.
-    { id: 'minecraft', labelKey: 'theme_minecraft' },
-    { id: 'minecraft-day', labelKey: 'theme_minecraft_day' },
-    { id: 'minecraft-night', labelKey: 'theme_minecraft_night' },
-    { id: 'dark-modern', labelKey: 'theme_dark_modern' },
-    { id: 'light-modern', labelKey: 'theme_light_modern' },
-    { id: 'retro', labelKey: 'theme_retro' },
-    { id: 'professional-light', labelKey: 'theme_professional_light' },
-    { id: 'professional-dark', labelKey: 'theme_professional_dark' },
-    { id: 'minimal', labelKey: 'theme_minimal' }
+    { id: 'minecraft', labelKey: 'theme_minecraft',
+        preview: [['#5b3f29', '#c6c6c6', '#2e7d1a', '#1e1e1e'], ['#1c1c21', '#2d2d33', '#5fd068', '#ececec']] },
+    { id: 'minecraft-day', labelKey: 'theme_minecraft_day', preview: [['#5b3f29', '#c6c6c6', '#2e7d1a', '#1e1e1e']] },
+    { id: 'minecraft-night', labelKey: 'theme_minecraft_night', preview: [['#1c1c21', '#2d2d33', '#5fd068', '#ececec']] },
+    { id: 'modern', labelKey: 'theme_modern', icons: 'svg',
+        preview: [['#f2f2f7', '#ffffff', '#007aff', '#1d1d1f'], ['#000000', '#1c1c1e', '#0a84ff', '#f5f5f7']] },
+    { id: 'cyberpunk', labelKey: 'theme_cyberpunk', preview: [['#07080c', '#10121a', '#fcee0a', '#5ef6ff']] },
+    { id: 'dark-modern', labelKey: 'theme_dark_modern', preview: [['#0d1117', '#151a23', '#5bd2c3', '#e8edf5']] },
+    { id: 'light-modern', labelKey: 'theme_light_modern', preview: [['#f5f7fb', '#ffffff', '#2db8db', '#1c2533']] },
+    { id: 'retro', labelKey: 'theme_retro', preview: [['#050805', '#07120a', '#2fff8f', '#9cffc5']] },
+    { id: 'professional-light', labelKey: 'theme_professional_light', preview: [['#f3f4f6', '#ffffff', '#245da8', '#1f2937']] },
+    { id: 'professional-dark', labelKey: 'theme_professional_dark', preview: [['#17191c', '#202327', '#3268ad', '#e7e9ed']] },
+    { id: 'minimal', labelKey: 'theme_minimal', icons: 'svg', preview: [['#121316', '#1a1b1f', '#8fa8c4', '#e7e7ea']] }
 ];
+
+function findTheme(themeId) {
+    return THEMES.find(theme => theme.id === themeId);
+}
+
+function getDefaultTheme() {
+    return findTheme(localStorage.getItem(THEME_STORAGE_KEY))?.id || SITE_DEFAULT_THEME;
+}
 
 function getCalcModelLabel(value) {
     const entry = CALC_MODEL_OPTIONS.find(option => String(option.value) === String(value));
@@ -3628,7 +3652,8 @@ const els = {
     btnConfirmBackup: document.getElementById('btnConfirmBackup'),
     btnCancelTransfer: document.getElementById('btnCancelTransfer'),
     btnConfirmTransfer: document.getElementById('btnConfirmTransfer'),
-    btnThemeToggle: document.getElementById('btnThemeToggle'),
+    themeList: document.getElementById('themeList'),
+    btnSetDefaultTheme: document.getElementById('btnSetDefaultTheme'),
     selectAllVars: document.getElementById('selectAllVars'),
     backupFormatBackup: document.getElementById('backupFormatBackup'),
     backupFormatTigroup: document.getElementById('backupFormatTigroup'),
@@ -3663,28 +3688,58 @@ const els = {
 state.settings = loadSettings();
 
 function applyTheme(themeId) {
-    const found = THEMES.find(theme => theme.id === themeId);
-    const target = found ? found.id : THEMES[0].id;
+    const target = findTheme(themeId)?.id || getDefaultTheme();
     document.body.dataset.theme = target;
-    localStorage.setItem(THEME_STORAGE_KEY, target);
-    updateThemeButton();
+    try {
+        sessionStorage.setItem(THEME_SESSION_KEY, target);
+    } catch {
+        // Storage can be blocked; the theme still applies to this page.
+    }
+    updateThemePicker();
     updateThemeIcons();
 }
 
-function updateThemeButton() {
-    if (!els.btnThemeToggle) {
+function setDefaultTheme(themeId) {
+    const target = findTheme(themeId)?.id;
+    if (!target) {
         return;
     }
-    const current = document.body.dataset.theme || THEMES[0].id;
-    const theme = THEMES.find(entry => entry.id === current) || THEMES[0];
-    els.btnThemeToggle.textContent = `${t('theme_prefix')}: ${getOptionLabel(theme)}`;
+    localStorage.setItem(THEME_STORAGE_KEY, target);
+    updateThemePicker();
 }
 
-function cycleTheme() {
-    const current = document.body.dataset.theme || THEMES[0].id;
-    const index = THEMES.findIndex(entry => entry.id === current);
-    const next = THEMES[(index + 1) % THEMES.length].id;
-    applyTheme(next);
+function themePreviewMarkup(theme) {
+    const halves = theme.preview.map(([bg, panel, accent, text]) => `<span class="theme-preview-half" style="--tp-bg:${bg};--tp-panel:${panel};--tp-accent:${accent};--tp-text:${text}"><span class="theme-preview-panel"><span class="theme-preview-line"></span><span class="theme-preview-line short"></span><span class="theme-preview-button"></span></span></span>`);
+    return `<span class="theme-preview${halves.length > 1 ? ' split' : ''}" aria-hidden="true">${halves.join('')}</span>`;
+}
+
+// Builds the theme list in Settings. Only translations call this: a theme
+// change just updates the existing options so focus stays where it is.
+function renderThemePicker() {
+    if (!els.themeList) {
+        return;
+    }
+    els.themeList.innerHTML = THEMES.map(theme => `<button type="button" class="theme-option" data-theme-id="${escapeHtml(theme.id)}" aria-pressed="false">${themePreviewMarkup(theme)}<span class="theme-option-name">${escapeHtml(getOptionLabel(theme))}</span><span class="theme-option-badge" hidden>${escapeHtml(t('theme_default_badge'))}</span></button>`).join('');
+    updateThemePicker();
+}
+
+function updateThemePicker() {
+    const current = document.body.dataset.theme;
+    const defaultTheme = getDefaultTheme();
+    els.themeList?.querySelectorAll('.theme-option').forEach(option => {
+        const id = option.dataset.themeId;
+        option.setAttribute('aria-pressed', String(id === current));
+        const badge = option.querySelector('.theme-option-badge');
+        if (badge) {
+            badge.hidden = id !== defaultTheme;
+        }
+    });
+    if (els.btnSetDefaultTheme) {
+        const isDefault = current === defaultTheme;
+        els.btnSetDefaultTheme.disabled = isDefault;
+        setIconLabel(els.btnSetDefaultTheme, isDefault ? 'check' : 'star',
+            t(isDefault ? 'theme_is_default' : 'theme_set_default'), isDefault ? '✅' : '⭐');
+    }
 }
 
 function showOfflineBanner() {
@@ -3786,8 +3841,14 @@ async function loadBuildInfo() {
 }
 
 function initTheme() {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    applyTheme(stored || THEMES[0].id);
+    let sessionTheme = null;
+    try {
+        sessionTheme = sessionStorage.getItem(THEME_SESSION_KEY);
+    } catch {
+        // Fall back to the default theme.
+    }
+    renderThemePicker();
+    applyTheme(findTheme(sessionTheme)?.id || getDefaultTheme());
 }
 
 function loadSettings() {
@@ -4427,7 +4488,9 @@ async function applyTranslations() {
     if (els.statusText) {
         syncStatusTranslation(els.statusText.dataset.i18nKey);
     }
-    updateThemeButton();
+    setTextContent(document.getElementById('themePickerTitle'), t('theme_prefix'));
+    setTextContent(document.getElementById('themePickerHint'), t('theme_picker_hint'));
+    renderThemePicker();
     updateCalcHint(els.settingCableModel?.value || state.settings?.cableModel || 'auto');
     updateSourceConversionSettingAvailability();
     applyActiveFamilyUiState({
@@ -11627,8 +11690,16 @@ function bindEvents() {
     document.querySelectorAll('.key-quick').forEach(button => {
         button.addEventListener('click', () => sendKey(button.dataset.key));
     });
-    if (els.btnThemeToggle) {
-        els.btnThemeToggle.addEventListener('click', cycleTheme);
+    if (els.themeList) {
+        els.themeList.addEventListener('click', event => {
+            const option = event.target.closest('.theme-option');
+            if (option) {
+                applyTheme(option.dataset.themeId);
+            }
+        });
+    }
+    if (els.btnSetDefaultTheme) {
+        els.btnSetDefaultTheme.addEventListener('click', () => setDefaultTheme(document.body.dataset.theme));
     }
     if (els.btnClearOfflineCache) {
         els.btnClearOfflineCache.addEventListener('click', () => {

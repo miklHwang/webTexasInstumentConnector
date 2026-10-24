@@ -33,6 +33,8 @@ class Element {
         this.children = [];
         this.dataset = {};
         this.disabled = false;
+        this.hidden = false;
+        this.attributes = new Map();
         this.classList = {
             add: name => this.classes.add(name),
             remove: name => this.classes.delete(name),
@@ -49,7 +51,18 @@ class Element {
             glyph.innerHTML = match[3];
             this.children.push(glyph);
         }
+        // Theme picker options and their "Default" badge.
+        for (const match of value.matchAll(/<button type="button" class="theme-option" data-theme-id="([^"]*)" aria-pressed="(true|false)">[\s\S]*?<span class="theme-option-badge"( hidden)?>[^<]*<\/span><\/button>/g)) {
+            const option = new Element('theme-option');
+            option.dataset = { themeId: decode(match[1]) };
+            option.setAttribute('aria-pressed', match[2]);
+            const badge = option.appendChild(new Element('theme-option-badge'));
+            badge.hidden = Boolean(match[3]);
+            this.children.push(option);
+        }
     }
+    setAttribute(name, value) { this.attributes.set(name, String(value)); }
+    getAttribute(name) { return this.attributes.get(name) ?? null; }
     get innerHTML() { return this.html || ''; }
     set textContent(value) {
         this.text = value;
@@ -70,26 +83,51 @@ class Element {
 
 const body = new Element();
 const storage = new Map();
-const themeButton = body.appendChild(new Element('btn'));
+const session = new Map();
+const themeList = new Element();
+const setDefaultButton = new Element('btn');
 const context = vm.createContext({
     document: { body, querySelectorAll: selector => body.querySelectorAll(selector) },
-    localStorage: { setItem: (key, value) => storage.set(key, value) },
-    els: { btnThemeToggle: themeButton },
+    localStorage: {
+        getItem: key => storage.get(key) ?? null,
+        setItem: (key, value) => storage.set(key, value)
+    },
+    sessionStorage: {
+        getItem: key => session.get(key) ?? null,
+        setItem: (key, value) => session.set(key, value)
+    },
+    els: { themeList, btnSetDefaultTheme: setDefaultButton },
     t: key => key,
     getOptionLabel: option => option.labelKey,
     applyTranslations() { assert.fail('changing theme must not reset device capabilities or loading controls'); },
     renderDirlist() { assert.fail('changing theme must not rebuild selected rows'); }
 });
-vm.runInContext(app.slice(app.indexOf('const THEME_STORAGE_KEY ='),
+vm.runInContext(app.slice(app.indexOf('const SITE_DEFAULT_THEME ='),
     app.indexOf('function getCalcModelLabel(')), context);
-for (const name of ['escapeHtml', 'isMinimalTheme', 'iconMarkup', 'themeIconMarkup',
-    'setIconLabel', 'updateThemeIcons', 'applyTheme', 'updateThemeButton',
-    'cycleTheme', 'setButtonLoading']) {
+for (const name of ['escapeHtml', 'themeUsesIcons', 'iconMarkup', 'themeIconMarkup',
+    'setIconLabel', 'updateThemeIcons', 'applyTheme', 'setDefaultTheme',
+    'themePreviewMarkup', 'renderThemePicker', 'updateThemePicker', 'initTheme',
+    'setButtonLoading']) {
     vm.runInContext(extractFunction(name), context);
 }
 
-// Start from the default (first) theme so the cycle below visits every entry in order.
-context.applyTheme(vm.runInContext('THEMES[0].id', context));
+const siteDefault = vm.runInContext('SITE_DEFAULT_THEME', context);
+const themeDefs = vm.runInContext('THEMES', context);
+const themes = Array.from(themeDefs, theme => theme.id);
+const iconThemes = new Set(themeDefs.filter(theme => theme.icons === 'svg').map(theme => theme.id));
+assert.ok(themes.includes(siteDefault), 'the site default is a listed theme');
+assert.ok(themes.includes('cyberpunk') && themes.includes('modern'), 'new themes are listed');
+assert.deepEqual([...iconThemes].sort(), ['minimal', 'modern'], 'Minimal and Modern draw icons');
+for (const theme of themeDefs) {
+    assert.ok(theme.preview.length >= 1 && theme.preview.every(colors => colors.length === 4), `${theme.id} has a preview`);
+}
+
+// A first visit opens with the site default and lists every theme.
+context.initTheme();
+assert.equal(body.dataset.theme, siteDefault);
+const options = themeList.querySelectorAll('.theme-option');
+assert.deepEqual(options.map(option => option.dataset.themeId), themes, 'the picker lists every theme in order');
+const optionBadges = options.map(option => option.querySelector('.theme-option-badge'));
 const settings = body.appendChild(new Element('btn'));
 const badge = settings.appendChild(new Element('settings-update-dot hidden'));
 context.setIconLabel(settings, 'settings', 'Settings & options', '⚙️');
@@ -113,16 +151,31 @@ const glyphs = body.querySelectorAll('.theme-icon');
 const children = new Map([settings, send, hiddenAction, row, sticky]
     .map(element => [element, [...element.children]]));
 
-// Go through every configured theme and wrap back to the initial theme. This
-// includes changing an already rendered row and sticky header in both directions.
-const themes = vm.runInContext('THEMES.map(theme => theme.id)', context);
+// Pick every theme twice, as from the picker, and set one as the default on
+// the way. This includes changing an already rendered row and sticky header
+// in both directions.
+let expectedDefault = siteDefault;
 for (let i = 0; i < themes.length * 2; i++) {
-    context.cycleTheme();
     const theme = themes[(i + 1) % themes.length];
+    context.applyTheme(theme);
+    if (i === 3) {
+        context.setDefaultTheme(theme);
+        expectedDefault = theme;
+    }
     assert.equal(body.dataset.theme, theme);
-    assert.equal(storage.get('webtilp.theme'), theme);
+    assert.equal(session.get('ticonnectmc.sessionTheme'), theme, 'a picked theme lasts for this tab');
+    assert.equal(storage.get('webtilp.theme'), i >= 3 ? expectedDefault : undefined, 'only Set as default changes the default');
+    const current = themeList.querySelectorAll('.theme-option');
+    current.forEach((option, index) => {
+        assert.equal(option, options[index], 'picker options are not recreated');
+        assert.equal(option.querySelector('.theme-option-badge'), optionBadges[index]);
+        assert.equal(option.getAttribute('aria-pressed'), String(option.dataset.themeId === theme));
+        assert.equal(optionBadges[index].hidden, option.dataset.themeId !== expectedDefault);
+    });
+    assert.equal(setDefaultButton.disabled, theme === expectedDefault);
+    assert.ok(setDefaultButton.textContent.includes(theme === expectedDefault ? 'theme_is_default' : 'theme_set_default'));
     for (const glyph of glyphs) {
-        if (theme === 'minimal') {
+        if (iconThemes.has(theme)) {
             assert.match(glyph.innerHTML, /<svg class="icon" aria-hidden="true">/);
             assert.ok(glyph.innerHTML.includes(`href="#icon-${glyph.dataset.icon}"`));
         } else {
@@ -145,7 +198,23 @@ for (let i = 0; i < themes.length * 2; i++) {
 context.setButtonLoading(send, false);
 assert.equal(send.disabled, false, 'loading cleanup still restores the original state');
 context.applyTheme('unknown-theme');
-assert.equal(body.dataset.theme, themes[0], 'unknown saved themes use the default');
+assert.equal(body.dataset.theme, expectedDefault, 'unknown themes use the default');
+context.setDefaultTheme('unknown-theme');
+assert.equal(storage.get('webtilp.theme'), expectedDefault, 'an unknown theme is never saved as the default');
+
+// Start-up order: the theme being tried in this tab, then the device default,
+// then the site default (also when the saved default no longer exists).
+session.set('ticonnectmc.sessionTheme', 'retro');
+context.initTheme();
+assert.equal(body.dataset.theme, 'retro');
+session.clear();
+context.initTheme();
+assert.equal(body.dataset.theme, expectedDefault);
+storage.set('webtilp.theme', 'removed-theme');
+session.clear();
+context.initTheme();
+assert.equal(body.dataset.theme, siteDefault);
+assert.equal(themeList.querySelectorAll('.theme-option').length, themes.length);
 
 // Translated labels and emoji metadata are text, including when they contain
 // markup delimiters. Switching back to emoji uses textContent, not HTML.
@@ -161,5 +230,7 @@ context.applyTheme('minimal');
 assert.ok(escapedGlyph.innerHTML.includes('#icon-info'));
 context.applyTheme('retro');
 assert.equal(escapedGlyph.textContent, emoji);
+context.applyTheme('modern');
+assert.ok(escapedGlyph.innerHTML.includes('#icon-info'));
 
-console.log('Theme switching tests passed (icons, loading controls, selection, badges, escaping)');
+console.log('Theme tests passed (picker, default theme, icons, loading controls, selection, badges, escaping)');

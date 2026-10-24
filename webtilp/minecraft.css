@@ -628,6 +628,70 @@ body[data-theme^="minecraft"] {
         border: 2px solid #000;
     }
 
+    /* ---------- Theme picker: inventory slots ---------- */
+    .theme-picker {
+        border-top: 2px solid var(--mc-divider);
+    }
+
+    .theme-picker-title {
+        font-size: 13px;
+        letter-spacing: 0.5px;
+    }
+
+    .theme-option {
+        font-size: 15px;
+        font-weight: 400;
+        border: 2px solid transparent;
+        border-radius: 0;
+        background: var(--mc-panel-alt);
+        box-shadow:
+            inset 2px 2px 0 var(--mc-lo),
+            inset -2px -2px 0 var(--mc-hi);
+    }
+
+    .theme-option:hover {
+        border-color: transparent;
+        background: light-dark(#e8e8e8, #2a2a31);
+    }
+
+    .theme-option[aria-pressed="true"] {
+        border-color: light-dark(#ffffff, #ffffa0);
+        box-shadow:
+            0 0 0 2px #000,
+            inset 2px 2px 0 var(--mc-lo),
+            inset -2px -2px 0 var(--mc-hi);
+    }
+
+    .theme-option[aria-pressed="true"]::after {
+        border-radius: 0;
+        border: 2px solid #000;
+        background: #55ff55;
+        color: #000;
+    }
+
+    .theme-preview,
+    .theme-preview-panel,
+    .theme-preview-line,
+    .theme-preview-button {
+        border-radius: 0;
+    }
+
+    .theme-preview {
+        box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.45);
+    }
+
+    .theme-option-badge {
+        border-radius: 0;
+        border: 1px solid #000;
+        background: #ffff55;
+        color: #3f3f15;
+        font-family: "Press Start 2P", monospace;
+        font-size-adjust: none;
+        font-size: 7px;
+        line-height: 1;
+        padding: 3px 4px 2px;
+    }
+
     .spinner,
     .initialization-spinner {
         border-radius: 0;

@@ -15,6 +15,8 @@
     <meta name="theme-color" content="#1e1e24" media="(prefers-color-scheme: dark)">
     <link rel="stylesheet" href="app.css">
     <link rel="stylesheet" href="minecraft.css">
+    <link rel="stylesheet" href="themes/cyberpunk.css">
+    <link rel="stylesheet" href="themes/modern.css">
     <link rel="stylesheet" href="build-profile.css">
 </head>
 <body class="initializing" aria-busy="true">
@@ -25,7 +27,7 @@
             <p>Initializing...</p>
         </div>
     </section>
-    <!-- Icon glyphs for the Minimal theme, vendored from Feather Icons (MIT License, Cole Bemis)
+    <!-- Icon glyphs for the Minimal and Modern themes, vendored from Feather Icons (MIT License, Cole Bemis)
          https://github.com/feathericons/feather; see third_party/feather/LICENSE -->
     <svg style="display:none" aria-hidden="true">
         <symbol id="icon-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
@@ -34,6 +36,7 @@
         <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol>
         <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
         <symbol id="icon-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+        <symbol id="icon-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
         <symbol id="icon-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
         <symbol id="icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
         <symbol id="icon-cpu" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></symbol>
@@ -289,9 +292,16 @@
                         </div>
                     </div>
                 </div>
+                <section class="theme-picker" aria-labelledby="themePickerTitle">
+                    <div class="theme-picker-header">
+                        <h4 class="theme-picker-title" id="themePickerTitle">Theme</h4>
+                        <button class="btn ghost mini" id="btnSetDefaultTheme" type="button">⭐ Set as default</button>
+                    </div>
+                    <div class="theme-list" id="themeList" role="group" aria-labelledby="themePickerTitle"></div>
+                    <p class="form-hint theme-picker-hint" id="themePickerHint">Click a theme to try it. Choose Set as default to open TI-ConnectMC with it next time on this device.</p>
+                </section>
             </div>
-            <div class="modal-footer modal-footer-split" style="justify-content: space-between">
-                <button class="btn ghost theme-toggle" id="btnThemeToggle" type="button">Theme: Dark Modern</button>
+            <div class="modal-footer modal-footer-split">
                 <div class="modal-footer-actions">
                     <button class="btn ghost" id="btnResetSettings">↩️ Reset Defaults</button>
                     <button class="btn primary" id="btnSaveSettings">💾 Save Settings</button>
@@ -492,8 +502,10 @@
         <span>Powered by <a href="https://github.com/debrouxl/tilibs/" target="_blank">tilibs</a> + <a href="https://github.com/debrouxl/hplp/" target="_blank">hplp</a> <i>(modified)</i>
               with features inspired by <a href="https://github.com/debrouxl/tilp_and_gfm" target="_blank">TILP</a>, all <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="_blank">GPLv2</a>-licensed.</span>
         <span>NumWorks support powered by <a href="https://github.com/Yaya-Cout/Upsilon.js" target="_blank">Upsilon.js</a> &amp; <a href="https://github.com/M4xi1m3/webdfu" target="_blank">WebDFU</a>, both <a href="https://opensource.org/license/mit" target="_blank">MIT</a>-licensed.</span>
-        <span>Pixel fonts: <a href="https://fonts.google.com/specimen/Jersey+10" target="_blank">Jersey 10</a> &amp; <a href="https://fonts.google.com/specimen/Press+Start+2P" target="_blank">Press Start 2P</a>, <a href="mc/fonts/OFL.txt" target="_blank">SIL OFL 1.1</a>. All textures are original artwork.</span>
+        <span>Pixel fonts: <a href="https://fonts.google.com/specimen/Jersey+10" target="_blank">Jersey 10</a> &amp; <a href="https://fonts.google.com/specimen/Press+Start+2P" target="_blank">Press Start 2P</a>, <a href="mc/fonts/OFL.txt" target="_blank">SIL OFL 1.1</a>.
+            Theme fonts: <a href="https://fonts.google.com/specimen/Rajdhani" target="_blank">Rajdhani</a> &amp; <a href="https://rsms.me/inter/" target="_blank">Inter</a>, <a href="themes/fonts/OFL.txt" target="_blank">SIL OFL 1.1</a>. All textures are original artwork.</span>
         <span>Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.
+            The Cyberpunk theme is a fan-made homage, not affiliated with or endorsed by CD PROJEKT RED.
             TI-ConnectMC and (Web)TILP are not affiliated with Texas Instruments, HP, or NumWorks — their trademarks belong to their respective owners.</span>
     </footer>
 

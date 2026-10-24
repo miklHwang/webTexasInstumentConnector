@@ -175,6 +175,8 @@ body[data-theme="retro"] .dropzone input[type="file"]::file-selector-button,
 body[data-theme="retro"] .splash-card,
 body[data-theme="retro"] .progress-bar,
 body[data-theme="retro"] .progress-bar-fill,
+body[data-theme="retro"] .theme-option,
+body[data-theme="retro"] .theme-preview,
 body[data-theme="retro"] .brand-mark,
 body[data-theme="retro"] .brand-beta {
     border-radius: 0;
@@ -242,6 +244,7 @@ body[data-theme="minimal"] .modal-card {
 }
 
 body[data-theme="minimal"] .info-card,
+body[data-theme="minimal"] .theme-option,
 body[data-theme="minimal"] .table-wrap,
 body[data-theme="minimal"] .settings-offline,
 body[data-theme="minimal"] .modal-overlay-card {
@@ -1688,6 +1691,182 @@ a {
     color: var(--muted);
 }
 
+/* Theme picker in Settings; each option previews its theme's own colours. */
+#settingsModal .modal-card {
+    max-height: calc(100dvh - 48px);
+    display: flex;
+    flex-direction: column;
+}
+
+#settingsModal .modal-body {
+    overflow-y: auto;
+    min-height: 0;
+    padding-bottom: 16px;
+}
+
+#settingsModal :is(.modal-header, .modal-footer) {
+    flex-shrink: 0;
+}
+
+.theme-picker {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.theme-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.theme-picker-title {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.theme-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+    gap: 10px;
+}
+
+.theme-option {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 6px 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-alt);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: left;
+    cursor: pointer;
+}
+
+.theme-option:hover {
+    border-color: var(--muted);
+}
+
+.theme-option[aria-pressed="true"] {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+}
+
+.theme-option:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Selected tick, top right of the preview. */
+.theme-option[aria-pressed="true"]::after {
+    content: "✓" / "";
+    position: absolute;
+    top: 11px;
+    right: 11px;
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--surface);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.theme-option-name {
+    padding: 0 4px;
+}
+
+.theme-option-badge {
+    position: absolute;
+    top: 11px;
+    left: 11px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.72);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.theme-option-badge[hidden] {
+    display: none;
+}
+
+.theme-preview {
+    position: relative;
+    display: block;
+    height: 56px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(128, 128, 128, 0.3);
+}
+
+.theme-preview-half {
+    position: absolute;
+    inset: 0;
+    background: var(--tp-bg);
+}
+
+/* Auto themes: Day/light in the top-left corner, Night/dark in the bottom-right. */
+.theme-preview.split .theme-preview-half + .theme-preview-half {
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+.theme-preview-panel {
+    position: absolute;
+    inset: 14px 12px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px;
+    border-radius: 5px 5px 0 0;
+    background: var(--tp-panel);
+}
+
+.theme-preview-line {
+    display: block;
+    width: 62%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--tp-text);
+    opacity: 0.75;
+}
+
+.theme-preview-line.short {
+    width: 40%;
+    opacity: 0.45;
+}
+
+.theme-preview-button {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    width: 24px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--tp-accent);
+}
+
+.theme-picker-hint {
+    margin: 10px 0 0;
+}
+
 @media (max-width: 1200px) {
     .layout {
         grid-template-columns: repeat(8, 1fr);
@@ -1841,10 +2020,12 @@ body:is([data-theme="professional-light"], [data-theme="professional-dark"]) {
         gap: 16px;
         align-content: start;
     }
-    .panel, .modal-card, .splash-card, .modal-overlay-card {
+    .panel, .modal-card, .splash-card, .modal-overlay-card, .theme-option {
         border-radius: 4px;
         box-shadow: none;
     }
+    .theme-option[aria-pressed="true"] { box-shadow: 0 0 0 1px var(--accent); }
+    .theme-preview { border-radius: 2px; }
     .panel-header { padding: 12px 16px; flex-wrap: wrap; }
     .panel-header h2, .modal-header h3 {
         font-size: 14px;

@@ -1,0 +1,536 @@
+/*
+ * TI-ConnectMC "Modern" theme: clean and simple, in the spirit of Apple's
+ * interfaces. Frosted bars, soft rounded cards, switches and thin line icons
+ * (Feather, see app.js setIconLabel). Follows the device light/dark setting.
+ *
+ * Apple devices use their system font; everything else gets Inter (SIL OFL 1.1,
+ * see fonts/OFL.txt), which is self-hosted so the app keeps working offline.
+ */
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("fonts/inter-latin-wght-normal.woff2") format("woff2-variations");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+body[data-theme="modern"] {
+    color-scheme: light dark;
+    --md-blue: light-dark(#0071e3, #0a84ff);
+    --md-green: light-dark(#248a3d, #30d158);
+    --md-fill: light-dark(rgba(120, 120, 128, 0.12), rgba(120, 120, 128, 0.24));
+    --md-fill-hover: light-dark(rgba(120, 120, 128, 0.2), rgba(120, 120, 128, 0.34));
+    --md-hairline: light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.12));
+    --md-glass: light-dark(rgba(251, 251, 253, 0.74), rgba(22, 22, 23, 0.72));
+    --md-card-shadow: 0 1px 2px light-dark(rgba(0, 0, 0, 0.04), transparent), 0 8px 28px light-dark(rgba(0, 0, 0, 0.07), transparent);
+    --md-ring: color-mix(in srgb, var(--md-blue) 45%, transparent);
+    --bg: light-dark(#f5f5f7, #000000);
+    --surface: light-dark(#ffffff, #1c1c1e);
+    --surface-alt: light-dark(#f5f5f7, #2c2c2e);
+    --border: var(--md-hairline);
+    --text: light-dark(#1d1d1f, #f5f5f7);
+    --muted: light-dark(#6e6e73, #98989d);
+    --accent: var(--md-blue);
+    --accent-2: var(--md-blue);
+    --danger: light-dark(#d70015, #ff6961);
+    --shadow: light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.5));
+    --shadow-soft: var(--md-fill);
+    --glow: transparent;
+    --toast-bg: light-dark(rgba(255, 255, 255, 0.86), rgba(44, 44, 46, 0.86));
+    --toast-text: var(--text);
+    --toast-border: var(--md-hairline);
+    --toast-error-bg: light-dark(rgba(255, 241, 240, 0.92), rgba(58, 28, 28, 0.92));
+    --toast-error-text: light-dark(#86000e, #ffd6d3);
+    --toast-error-border: light-dark(rgba(215, 0, 21, 0.25), rgba(255, 105, 97, 0.35));
+
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI Variable Text", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+    letter-spacing: -0.005em;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    accent-color: var(--md-blue);
+    scrollbar-color: light-dark(rgba(0, 0, 0, 0.28), rgba(255, 255, 255, 0.28)) transparent;
+
+    .btn, .search, .form-input, select, input, textarea, .theme-option {
+        font-family: inherit;
+        letter-spacing: inherit;
+    }
+
+    /* Thin, rounded line icons; tinted blue on plain buttons. */
+    .icon {
+        stroke-width: 1.75;
+    }
+
+    .btn:is(.ghost, .subtle):not(:disabled) .icon {
+        color: var(--md-blue);
+    }
+
+    /* ---------- Bars ---------- */
+    .topbar,
+    .footer {
+        background: var(--md-glass);
+        backdrop-filter: saturate(180%) blur(20px);
+        border-color: var(--md-hairline);
+    }
+
+    .topbar {
+        padding-block: 14px;
+    }
+
+    .brand-mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 24%;
+        corner-shape: squircle;
+        background: linear-gradient(180deg, #5ac8fa, #007aff);
+        color: #ffffff;
+        font-weight: 700;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 122, 255, 0.25);
+    }
+
+    .brand-mark > span.brand-beta {
+        background: var(--surface);
+        color: var(--text);
+        border-color: var(--md-hairline);
+        font-weight: 600;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .brand-title {
+        font-size: 19px;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle,
+    .status {
+        color: var(--muted);
+    }
+
+    .status-dot.is-active {
+        background: var(--md-green);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-green) 18%, transparent) !important;
+    }
+
+    .settings-update-dot {
+        background: #ff3b30;
+        box-shadow: 0 0 0 2px var(--surface);
+    }
+
+    /* ---------- Cards ---------- */
+    .panel,
+    .splash-card {
+        border: 0;
+        border-radius: 20px;
+        background: var(--surface);
+        box-shadow: var(--md-card-shadow);
+    }
+
+    .panel-header,
+    .modal-header {
+        background: transparent;
+        border-bottom: 1px solid var(--md-hairline);
+    }
+
+    .panel-header h2,
+    .modal-header h3 {
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.015em;
+    }
+
+    .info-card {
+        border: 0;
+        border-radius: 14px;
+        background: var(--surface-alt);
+        box-shadow: none;
+    }
+
+    .info-card .label,
+    .form-field label:not(.form-option),
+    .theme-picker-title {
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: none;
+        letter-spacing: 0;
+        color: var(--muted);
+    }
+
+    .info-card .value {
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.015em;
+    }
+
+    .info-list,
+    .settings-offline {
+        border-radius: 14px;
+        border-color: var(--md-hairline);
+    }
+
+    /* ---------- Buttons ---------- */
+    .btn {
+        border: 0;
+        border-radius: 999px;
+        padding: 9px 16px;
+        font-size: 14px;
+        font-weight: 500;
+        min-height: 36px;
+        transition: background-color 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+    }
+
+    .btn.mini {
+        padding: 4px 11px;
+        font-size: 12px;
+        min-height: 26px;
+        border-radius: 999px;
+    }
+
+    .btn.primary {
+        background: var(--md-blue);
+        color: #ffffff;
+        box-shadow: none;
+    }
+
+    .btn.ghost,
+    .btn.subtle,
+    .btn.send-idle {
+        background: var(--md-fill);
+        color: var(--text);
+        box-shadow: none;
+    }
+
+    .btn.danger {
+        background: color-mix(in srgb, var(--danger) 12%, transparent);
+        color: var(--danger);
+    }
+
+    .btn:not(:disabled):hover {
+        transform: none;
+        background-color: var(--md-fill-hover);
+    }
+
+    .btn.primary:not(:disabled):hover {
+        background: light-dark(#0077ed, #2490ff);
+    }
+
+    .btn.danger:not(:disabled):hover {
+        background: color-mix(in srgb, var(--danger) 20%, transparent);
+    }
+
+    .btn:not(:disabled):active {
+        transform: scale(0.97);
+    }
+
+    .btn:disabled,
+    .btn.disabled {
+        opacity: 0.4;
+    }
+
+    .row-actions .btn-inline {
+        background: transparent;
+        color: var(--md-blue);
+    }
+
+    :is(button, input, select, textarea, a, .folder-toggle):focus-visible {
+        outline: 3px solid var(--md-ring);
+        outline-offset: 1px;
+    }
+
+    /* Round grey close buttons with a drawn X (the ✖️ emoji stays the accessible name). */
+    :is(#btnCloseSettings, #btnCloseTransfer, #btnCloseNewFolder, #btnCloseBackup, #btnCloseBackupGuide, #btnClosePreview) {
+        width: 30px;
+        min-height: 30px;
+        height: 30px;
+        padding: 0;
+        border-radius: 50%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-indent: 200%;
+        color: var(--muted);
+
+        &::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            width: 14px;
+            height: 14px;
+            background: currentColor;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") center / contain no-repeat;
+        }
+    }
+
+    /* ---------- Fields ---------- */
+    .search,
+    .form-input {
+        border-radius: 10px;
+        border: 1px solid light-dark(#d2d2d7, #3a3a3c);
+        background: var(--surface);
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 400;
+    }
+
+    .search:focus,
+    .form-input:focus {
+        outline: none;
+        border-color: var(--md-blue);
+        box-shadow: 0 0 0 4px var(--md-ring);
+    }
+
+    .search::placeholder,
+    .form-input::placeholder {
+        color: var(--muted);
+        opacity: 1;
+    }
+
+    /* Settings checkboxes become switches. */
+    .form-field .form-option input[type="checkbox"] {
+        appearance: none;
+        flex-shrink: 0;
+        position: relative;
+        width: 42px;
+        height: 26px;
+        margin: 0;
+        border-radius: 13px;
+        background: light-dark(rgba(120, 120, 128, 0.22), rgba(120, 120, 128, 0.36));
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .form-field .form-option input[type="checkbox"]::before {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s ease;
+    }
+
+    .form-field .form-option input[type="checkbox"]:checked {
+        background: #34c759;
+    }
+
+    .form-field .form-option input[type="checkbox"]:checked::before {
+        transform: translateX(16px);
+    }
+
+    .form-field .form-option input[type="checkbox"]:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .dropzone {
+        border: 1.5px dashed light-dark(#c7c7cc, #48484a);
+        border-radius: 16px;
+        background: var(--surface-alt);
+    }
+
+    .dropzone.drag-over {
+        border-color: var(--md-blue);
+        border-style: solid;
+        background: color-mix(in srgb, var(--md-blue) 8%, var(--surface));
+        box-shadow: none;
+    }
+
+    .dropzone-text .title {
+        font-weight: 600;
+    }
+
+    .dropzone input[type="file"] {
+        border-radius: 10px;
+        background: var(--surface);
+    }
+
+    .dropzone input[type="file"]::file-selector-button {
+        border: 0;
+        border-radius: 999px;
+        background: var(--md-fill);
+        color: var(--md-blue);
+        font-family: inherit;
+        font-weight: 500;
+    }
+
+    /* ---------- Variables table ---------- */
+    .table-wrap {
+        border-radius: 14px;
+        border-color: var(--md-hairline);
+        background: var(--surface);
+    }
+
+    .var-table th,
+    .folder-sticky td {
+        background: color-mix(in srgb, var(--surface-alt) 92%, transparent);
+        backdrop-filter: blur(12px);
+    }
+
+    .var-table th {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+    }
+
+    .var-table :is(th, td),
+    .folder-sticky td {
+        border-bottom-color: var(--md-hairline);
+    }
+
+    .var-table tr:hover {
+        background: light-dark(rgba(0, 0, 0, 0.03), rgba(255, 255, 255, 0.05));
+    }
+
+    .var-table tr.drop-target {
+        background: color-mix(in srgb, var(--md-blue) 12%, transparent);
+        outline: 1.5px dashed var(--md-blue);
+    }
+
+    .folder-icon {
+        color: var(--md-blue);
+    }
+
+    /* ---------- Progress, log, screenshot ---------- */
+    .progress-bar {
+        background: var(--md-fill);
+    }
+
+    .progress-bar-fill {
+        background: var(--md-blue);
+    }
+
+    .log,
+    .preview-content {
+        border-radius: 14px;
+        border: 0;
+        background: var(--surface-alt);
+        color: var(--text);
+        font-family: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+        line-height: 1.55;
+    }
+
+    .log-error {
+        color: var(--danger);
+    }
+
+    #screenshotCanvas {
+        outline: 0;
+        border-radius: 6px;
+        box-shadow: 0 0 0 1px var(--md-hairline), 0 8px 24px var(--shadow);
+    }
+
+    /* ---------- Sheets and banners ---------- */
+    .modal,
+    .modal-overlay {
+        background: light-dark(rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.55));
+        backdrop-filter: blur(8px);
+    }
+
+    .modal-card {
+        border: 0;
+        border-radius: 22px;
+        background: var(--surface);
+        box-shadow: 0 0 0 1px var(--md-hairline), 0 24px 64px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-footer {
+        background: transparent;
+        border-top: 1px solid var(--md-hairline);
+    }
+
+    .modal-overlay-card {
+        border: 0;
+        border-radius: 16px;
+        background: var(--md-glass);
+        backdrop-filter: blur(20px);
+    }
+
+    .toast {
+        border-radius: 16px;
+        backdrop-filter: saturate(180%) blur(20px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .toast-title {
+        font-weight: 600;
+    }
+
+    .spinner,
+    .initialization-spinner {
+        border-color: var(--md-fill);
+        border-top-color: var(--muted);
+    }
+
+    .splash h1 {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        /* Keeps "TI-ConnectMC" together instead of breaking after the hyphen. */
+        text-wrap: balance;
+    }
+
+    .splash-warning {
+        border-radius: 14px;
+    }
+
+    .footer a {
+        color: var(--md-blue);
+    }
+
+    .footer a:hover {
+        border-bottom-color: transparent;
+        text-decoration: underline;
+    }
+
+    a {
+        color: var(--md-blue);
+    }
+
+    /* ---------- Theme picker ---------- */
+    .theme-picker {
+        border-top-color: var(--md-hairline);
+    }
+
+    .theme-option {
+        border: 0;
+        border-radius: 16px;
+        background: var(--surface-alt);
+        font-weight: 500;
+    }
+
+    .theme-option:hover {
+        background: var(--md-fill-hover);
+    }
+
+    .theme-option[aria-pressed="true"] {
+        box-shadow: 0 0 0 2px var(--md-blue);
+    }
+
+    .theme-option[aria-pressed="true"]::after {
+        background: var(--md-blue);
+        color: #ffffff;
+    }
+
+    .theme-preview {
+        border-radius: 11px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .btn,
+        .form-field .form-option input[type="checkbox"],
+        .form-field .form-option input[type="checkbox"]::before {
+            transition: none;
+        }
+
+        .btn:not(:disabled):active {
+            transform: none;
+        }
+    }
+}
