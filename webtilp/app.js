@@ -828,8 +828,8 @@ const I18N_EN = {
     "loading_dirlist": "Loading directory listing...",
     "create_backup": "Create Backup",
     "theme_prefix": "Theme",
-    "theme_dark_modern": "Dark Modern",
-    "theme_light_modern": "Light Modern",
+    "theme_dark_modern": "Aurora Dark",
+    "theme_light_modern": "Aurora Light",
     "theme_retro": "Retro Terminal",
     "theme_professional_light": "Professional Light",
     "theme_professional_dark": "Professional Dark",
@@ -839,7 +839,7 @@ const I18N_EN = {
     "theme_minecraft_night": "Minecraft Night",
     "theme_modern": "Modern",
     "theme_cyberpunk": "Cyberpunk",
-    "theme_picker_hint": "Click a theme to try it. Choose Set as default to open TI-ConnectMC with it next time on this device.",
+    "theme_picker_hint": "Click a theme to try it. Choose Set as default to keep it on this device: TI-ConnectMC will open with it and the app icon will match.",
     "theme_set_default": "Set as default",
     "theme_is_default": "Your default theme",
     "theme_default_badge": "Default",
@@ -3528,20 +3528,30 @@ const THEME_STORAGE_KEY = 'webtilp.theme';
 const THEME_SESSION_KEY = 'ticonnectmc.sessionTheme';
 // preview: one [background, panel, accent, text] palette per picker swatch half
 // (themes that follow the device light/dark setting show both).
+// bar: the browser bar / app title bar colour, [light, dark] for those themes.
 const THEMES = [
-    { id: 'minecraft', labelKey: 'theme_minecraft',
+    { id: 'minecraft', labelKey: 'theme_minecraft', bar: ['#6a4a31', '#1e1e24'],
         preview: [['#5b3f29', '#c6c6c6', '#2e7d1a', '#1e1e1e'], ['#1c1c21', '#2d2d33', '#5fd068', '#ececec']] },
-    { id: 'minecraft-day', labelKey: 'theme_minecraft_day', preview: [['#5b3f29', '#c6c6c6', '#2e7d1a', '#1e1e1e']] },
-    { id: 'minecraft-night', labelKey: 'theme_minecraft_night', preview: [['#1c1c21', '#2d2d33', '#5fd068', '#ececec']] },
-    { id: 'modern', labelKey: 'theme_modern', icons: 'svg',
+    { id: 'minecraft-day', labelKey: 'theme_minecraft_day', bar: ['#6a4a31'],
+        preview: [['#5b3f29', '#c6c6c6', '#2e7d1a', '#1e1e1e']] },
+    { id: 'minecraft-night', labelKey: 'theme_minecraft_night', bar: ['#1e1e24'],
+        preview: [['#1c1c21', '#2d2d33', '#5fd068', '#ececec']] },
+    { id: 'modern', labelKey: 'theme_modern', icons: 'svg', bar: ['#f9f9fb', '#101011'],
         preview: [['#f2f2f7', '#ffffff', '#007aff', '#1d1d1f'], ['#000000', '#1c1c1e', '#0a84ff', '#f5f5f7']] },
-    { id: 'cyberpunk', labelKey: 'theme_cyberpunk', preview: [['#07080c', '#10121a', '#fcee0a', '#5ef6ff']] },
-    { id: 'dark-modern', labelKey: 'theme_dark_modern', preview: [['#0d1117', '#151a23', '#5bd2c3', '#e8edf5']] },
-    { id: 'light-modern', labelKey: 'theme_light_modern', preview: [['#f5f7fb', '#ffffff', '#2db8db', '#1c2533']] },
-    { id: 'retro', labelKey: 'theme_retro', preview: [['#050805', '#07120a', '#2fff8f', '#9cffc5']] },
-    { id: 'professional-light', labelKey: 'theme_professional_light', preview: [['#f3f4f6', '#ffffff', '#245da8', '#1f2937']] },
-    { id: 'professional-dark', labelKey: 'theme_professional_dark', preview: [['#17191c', '#202327', '#3268ad', '#e7e9ed']] },
-    { id: 'minimal', labelKey: 'theme_minimal', icons: 'svg', preview: [['#121316', '#1a1b1f', '#8fa8c4', '#e7e7ea']] }
+    { id: 'cyberpunk', labelKey: 'theme_cyberpunk', bar: ['#07080c'],
+        preview: [['#07080c', '#10121a', '#fcee0a', '#5ef6ff']] },
+    { id: 'dark-modern', labelKey: 'theme_dark_modern', bar: ['#0b0f15'],
+        preview: [['#0d1117', '#151a23', '#5bd2c3', '#e8edf5']] },
+    { id: 'light-modern', labelKey: 'theme_light_modern', bar: ['#ffffff'],
+        preview: [['#f5f7fb', '#ffffff', '#2db8db', '#1c2533']] },
+    { id: 'retro', labelKey: 'theme_retro', bar: ['#050e08'],
+        preview: [['#050805', '#07120a', '#2fff8f', '#9cffc5']] },
+    { id: 'professional-light', labelKey: 'theme_professional_light', bar: ['#ffffff'],
+        preview: [['#f3f4f6', '#ffffff', '#245da8', '#1f2937']] },
+    { id: 'professional-dark', labelKey: 'theme_professional_dark', bar: ['#202327'],
+        preview: [['#17191c', '#202327', '#3268ad', '#e7e9ed']] },
+    { id: 'minimal', labelKey: 'theme_minimal', icons: 'svg', bar: ['#1a1b1f'],
+        preview: [['#121316', '#1a1b1f', '#8fa8c4', '#e7e7ea']] }
 ];
 
 function findTheme(themeId) {
@@ -3695,16 +3705,27 @@ function applyTheme(themeId) {
     } catch {
         // Storage can be blocked; the theme still applies to this page.
     }
+    applyBarColor(findTheme(target));
     updateThemePicker();
     updateThemeIcons();
 }
 
+// The theme-color metas colour the mobile browser bar and the installed app's title bar.
+function applyBarColor(theme) {
+    const [light, dark = light] = theme.bar;
+    document.querySelectorAll('meta[name="theme-color"]').forEach(meta => {
+        meta.setAttribute('content', (meta.getAttribute('media') || '').includes('dark') ? dark : light);
+    });
+}
+
+// The default theme also picks the app icon (see app-icon.js).
 function setDefaultTheme(themeId) {
     const target = findTheme(themeId)?.id;
     if (!target) {
         return;
     }
     localStorage.setItem(THEME_STORAGE_KEY, target);
+    globalThis.TIConnectMCAppIcon?.apply(target);
     updateThemePicker();
 }
 

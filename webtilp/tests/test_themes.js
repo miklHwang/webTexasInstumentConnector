@@ -86,8 +86,18 @@ const storage = new Map();
 const session = new Map();
 const themeList = new Element();
 const setDefaultButton = new Element('btn');
+const barLight = new Element();
+barLight.setAttribute('media', '(prefers-color-scheme: light)');
+const barDark = new Element();
+barDark.setAttribute('media', '(prefers-color-scheme: dark)');
+const appIcons = [];
 const context = vm.createContext({
-    document: { body, querySelectorAll: selector => body.querySelectorAll(selector) },
+    document: {
+        body,
+        querySelectorAll: selector => selector === 'meta[name="theme-color"]'
+            ? [barLight, barDark] : body.querySelectorAll(selector)
+    },
+    TIConnectMCAppIcon: { apply: theme => appIcons.push(theme) },
     localStorage: {
         getItem: key => storage.get(key) ?? null,
         setItem: (key, value) => storage.set(key, value)
@@ -105,7 +115,7 @@ const context = vm.createContext({
 vm.runInContext(app.slice(app.indexOf('const SITE_DEFAULT_THEME ='),
     app.indexOf('function getCalcModelLabel(')), context);
 for (const name of ['escapeHtml', 'themeUsesIcons', 'iconMarkup', 'themeIconMarkup',
-    'setIconLabel', 'updateThemeIcons', 'applyTheme', 'setDefaultTheme',
+    'setIconLabel', 'updateThemeIcons', 'applyTheme', 'applyBarColor', 'setDefaultTheme',
     'themePreviewMarkup', 'renderThemePicker', 'updateThemePicker', 'initTheme',
     'setButtonLoading']) {
     vm.runInContext(extractFunction(name), context);
@@ -120,7 +130,9 @@ assert.ok(themes.includes('cyberpunk') && themes.includes('modern'), 'new themes
 assert.deepEqual([...iconThemes].sort(), ['minimal', 'modern'], 'Minimal and Modern draw icons');
 for (const theme of themeDefs) {
     assert.ok(theme.preview.length >= 1 && theme.preview.every(colors => colors.length === 4), `${theme.id} has a preview`);
+    assert.ok([1, 2].includes(theme.bar.length) && theme.bar.every(color => /^#[0-9a-f]{6}$/.test(color)), `${theme.id} has a bar colour`);
 }
+const themeBars = new Map(themeDefs.map(theme => [theme.id, theme.bar]));
 
 // A first visit opens with the site default and lists every theme.
 context.initTheme();
@@ -161,8 +173,12 @@ for (let i = 0; i < themes.length * 2; i++) {
     if (i === 3) {
         context.setDefaultTheme(theme);
         expectedDefault = theme;
+        assert.deepEqual(appIcons, [theme], 'Set as default switches the app icon');
     }
     assert.equal(body.dataset.theme, theme);
+    const [light, dark = light] = themeBars.get(theme);
+    assert.equal(barLight.getAttribute('content'), light, 'the browser bar follows the theme');
+    assert.equal(barDark.getAttribute('content'), dark);
     assert.equal(session.get('ticonnectmc.sessionTheme'), theme, 'a picked theme lasts for this tab');
     assert.equal(storage.get('webtilp.theme'), i >= 3 ? expectedDefault : undefined, 'only Set as default changes the default');
     const current = themeList.querySelectorAll('.theme-option');
@@ -201,6 +217,7 @@ context.applyTheme('unknown-theme');
 assert.equal(body.dataset.theme, expectedDefault, 'unknown themes use the default');
 context.setDefaultTheme('unknown-theme');
 assert.equal(storage.get('webtilp.theme'), expectedDefault, 'an unknown theme is never saved as the default');
+assert.equal(appIcons.length, 1, 'trying themes never changes the app icon');
 
 // Start-up order: the theme being tried in this tab, then the device default,
 // then the site default (also when the saved default no longer exists).
@@ -233,4 +250,4 @@ assert.equal(escapedGlyph.textContent, emoji);
 context.applyTheme('modern');
 assert.ok(escapedGlyph.innerHTML.includes('#icon-info'));
 
-console.log('Theme tests passed (picker, default theme, icons, loading controls, selection, badges, escaping)');
+console.log('Theme tests passed (picker, default theme, app icon, bar colour, icons, loading controls, selection, badges, escaping)');

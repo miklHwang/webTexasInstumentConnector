@@ -25,7 +25,8 @@ You need a Chromium-based browser (Chrome or Edge) on Windows, macOS, Linux, Chr
 Open **Settings** to see every theme as a preview card:
 
 - **Try a theme:** click its card. It stays on until you close the tab.
-- **Keep it:** click **Set as default**. The site then opens with that theme on this device. A "Default" badge marks the current default.
+- **Keep it:** click **Set as default**. The site then opens with that theme on this device, and a "Default" badge marks it.
+- **App icon:** the default theme also sets the icon in the browser tab and the icon of the installed app (home screen, dock or Start menu). Each theme has its own version of the calculator icon. An installed app picks up the new icon the next time it's opened. Chrome may ask you to confirm the change, and Android can take up to a day.
 - **Link to a theme:** add `?theme=` to the address, for example `webtilp.html?theme=cyberpunk`.
 
 | Theme | Look |
@@ -35,7 +36,7 @@ Open **Settings** to see every theme as a preview card:
 | **Minecraft Night** | Deepslate background with dark panels. |
 | **Modern** | Clean and simple, in the spirit of Apple's apps. Frosted bars, rounded cards, switches, thin line icons. Follows light/dark. |
 | **Cyberpunk** | A fan-made homage to Cyberpunk 2077: neon yellow, cyan and red, bevelled HUD frames, and a glitching logo. |
-| **Dark Modern**, **Light Modern**, **Retro Terminal**, **Professional Light/Dark**, **Minimal** | The original WebTILP themes. |
+| **Aurora Dark**, **Aurora Light**, **Retro Terminal**, **Professional Light/Dark**, **Minimal** | The original WebTILP themes. Aurora Dark and Light were called Dark Modern and Light Modern upstream. |
 
 To change the default for first-time visitors, edit `SITE_DEFAULT_THEME` in `webtilp/app.js`.
 
@@ -60,6 +61,9 @@ Where the themes live:
 | `webtilp/mc/tools/make_textures.py` | Generates the textures and the favicon/app icons. Needs Pillow; run `python3 webtilp/mc/tools/make_textures.py` |
 | `webtilp/themes/cyberpunk.css`, `webtilp/themes/modern.css` | The Cyberpunk and Modern stylesheets |
 | `webtilp/themes/fonts/` | Rajdhani and Inter, with `OFL.txt` |
+| `webtilp/themes/icons/<set>/` | Each theme's app icons and install manifest (the Minecraft icons are at the root) |
+| `webtilp/themes/tools/make_icons.py` | Draws those icon sets. Needs Pillow; run `python3 webtilp/themes/tools/make_icons.py` |
+| `webtilp/app-icon.js` | Points the icon and manifest links at the default theme's icon set |
 | `webtilp/app.js` | The "TI-ConnectMC extras" block (splash, achievements, click sounds), the `THEMES` list and the theme picker |
 
 Internal names are left as upstream has them (the `webtilp.*` file names, element ids and storage keys), so upstream updates merge cleanly.
